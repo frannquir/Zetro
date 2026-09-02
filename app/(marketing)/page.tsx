@@ -1,16 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import {
-  ArrowRight,
-  BarChart3,
-  CalendarCheck,
-  Check,
-  Globe,
-  MessageSquare,
-  Rocket,
-  Smartphone,
-  Zap,
-} from 'lucide-react'
+import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PanelPreview } from '@/components/marketing/panel-preview'
 import { works } from '@/content/works'
@@ -24,32 +14,26 @@ export const metadata: Metadata = {
 
 const features = [
   {
-    icon: Globe,
     title: 'Un sitio que carga rápido',
     body: 'Next.js, hosting incluido y tu dominio. Nada de plantillas pesadas ni plugins que se rompen solos.',
   },
   {
-    icon: CalendarCheck,
     title: 'Reservas que no se pisan',
     body: 'El cliente reserva desde tu sitio y entra directo a tu agenda. Dos personas no pueden tomar la misma mesa.',
   },
   {
-    icon: BarChart3,
     title: 'Números que sirven',
     body: 'Cuánta gente entró, de dónde vino y cuántos terminaron reservando. En la misma pantalla.',
   },
   {
-    icon: Smartphone,
     title: 'Se maneja del celular',
     body: 'El panel está pensado para usarse parado detrás de la barra, no sentado en una oficina.',
   },
   {
-    icon: MessageSquare,
     title: 'Tu contenido, sin depender de nosotros',
     body: 'Cambiás la carta, los horarios o los precios desde el panel y el sitio se actualiza al toque.',
   },
   {
-    icon: Zap,
     title: 'Listo en dos semanas',
     body: 'Charla, propuesta, sitio en línea. Sin reuniones de descubrimiento de tres meses.',
   },
@@ -134,25 +118,25 @@ const faqs = [
   },
 ]
 
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return <p className="text-xs leading-none tracking-[0.06em] uppercase font-medium text-ink-4">{children}</p>
+}
+
 export default function LandingPage() {
   const featured = works.slice(0, 3)
 
   return (
     <>
-      <section className="relative overflow-hidden border-b">
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_50%_0%,var(--accent),transparent)]" />
-        <div className="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:py-24">
-          <div className="space-y-7">
-            <span className="inline-flex items-center gap-2 rounded-full border bg-background/70 px-3 py-1 text-xs font-medium text-muted-foreground">
-              <Rocket className="size-3.5 text-primary" />
-              Sitios en línea en dos semanas
-            </span>
+      <section className="border-b border-n-200">
+        <div className="mx-auto grid w-full max-w-[75rem] gap-12 px-5 py-16 sm:px-8 lg:grid-cols-12 lg:items-center lg:py-24">
+          <div className="space-y-7 lg:col-span-7">
+            <Eyebrow>Sitios y panel para negocios</Eyebrow>
 
-            <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+            <h1 className="text-[2.5rem] leading-[1.02] tracking-[-0.03em] font-semibold text-balance text-ink sm:text-[3.5rem]">
               El sitio de tu negocio, y el panel para manejarlo.
             </h1>
 
-            <p className="max-w-xl text-lg text-muted-foreground text-pretty">
+            <p className="max-w-xl text-[1.0625rem] leading-[1.55] text-ink-2 text-pretty">
               Hacemos sitios web para restaurantes, cafés, gimnasios y barberías. Con reservas online que entran a tu
               agenda, tu carta siempre al día y las estadísticas que importan.
             </p>
@@ -168,76 +152,86 @@ export default function LandingPage() {
               </Button>
             </div>
 
-            <dl className="flex flex-wrap gap-x-10 gap-y-4 border-t pt-6">
+            <dl className="flex flex-wrap gap-x-10 gap-y-4 border-t border-n-200 pt-6">
               {[
                 { k: 'Sitios publicados', v: '40+' },
                 { k: 'Puesta en línea promedio', v: '12 días' },
                 { k: 'Reservas gestionadas por mes', v: '9.000' },
               ].map((stat) => (
                 <div key={stat.k}>
-                  <dt className="text-xs text-muted-foreground">{stat.k}</dt>
-                  <dd className="text-xl font-semibold tracking-tight tabular-nums">{stat.v}</dd>
+                  <dt className="text-[0.8125rem] text-ink-3">{stat.k}</dt>
+                  <dd className="text-xl leading-none tracking-[-0.02em] font-semibold tnum text-ink">{stat.v}</dd>
                 </div>
               ))}
             </dl>
           </div>
 
-          <PanelPreview />
+          <div className="lg:col-span-5">
+            <PanelPreview />
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-5 py-16 lg:py-20">
+      <section className="mx-auto w-full max-w-[75rem] px-5 py-16 sm:px-8 lg:py-20">
         <div className="max-w-2xl space-y-3">
-          <p className="text-sm font-medium text-primary">Qué te llevás</p>
-          <h2 className="text-3xl font-semibold tracking-tight text-balance">
+          <Eyebrow>Qué te llevás</Eyebrow>
+          <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
             Un sitio no alcanza si después seguís anotando en un cuaderno.
           </h2>
-          <p className="text-muted-foreground text-pretty">
+          <p className="text-[1.0625rem] leading-[1.55] text-ink-2 text-pretty">
             Por eso todo lo que hacemos viene con un panel atrás. El sitio muestra; el panel resuelve.
           </p>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature) => (
-            <div key={feature.title} className="rounded-xl border bg-card p-5 transition-colors hover:border-primary/40">
-              <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <feature.icon className="size-5" />
+        <div className="mt-10 grid gap-x-8 gap-y-8 md:grid-cols-2">
+          {features.map((feature, index) => (
+            <div key={feature.title} className="grid grid-cols-[2rem_1fr] gap-x-3">
+              <span className="pt-0.5 text-[0.8125rem] font-medium tnum text-ink-4">
+                {String(index + 1).padStart(2, '0')}
               </span>
-              <h3 className="mt-4 font-medium">{feature.title}</h3>
-              <p className="mt-1.5 text-sm text-muted-foreground text-pretty">{feature.body}</p>
+              <div>
+                <h3 className="font-medium text-ink">{feature.title}</h3>
+                <p className="mt-1.5 text-[0.9375rem] leading-[1.55] text-ink-2 text-pretty">{feature.body}</p>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      <section id="como-funciona" className="scroll-mt-20 border-y bg-muted/30">
-        <div className="mx-auto w-full max-w-6xl px-5 py-16 lg:py-20">
+      <section id="como-funciona" className="scroll-mt-20 border-t border-n-200">
+        <div className="mx-auto w-full max-w-[75rem] px-5 py-16 sm:px-8 lg:py-20">
           <div className="max-w-2xl space-y-3">
-            <p className="text-sm font-medium text-primary">Cómo funciona</p>
-            <h2 className="text-3xl font-semibold tracking-tight text-balance">Cuatro pasos y estás en línea.</h2>
+            <Eyebrow>Cómo funciona</Eyebrow>
+            <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
+              Cuatro pasos y estás en línea.
+            </h2>
           </div>
 
           <ol className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {steps.map((step, index) => (
-              <li key={step.title} className="relative space-y-2 border-t-2 border-primary/25 pt-5">
-                <span className="text-sm font-semibold tabular-nums text-primary">0{index + 1}</span>
-                <h3 className="font-medium">{step.title}</h3>
-                <p className="text-sm text-muted-foreground text-pretty">{step.body}</p>
+              <li key={step.title} className="space-y-2 border-t border-n-300 pt-5">
+                <span className="text-[1.75rem] leading-none tracking-[-0.02em] font-semibold tnum text-ink">
+                  0{index + 1}
+                </span>
+                <h3 className="font-medium text-ink">{step.title}</h3>
+                <p className="text-[0.9375rem] leading-[1.55] text-ink-2 text-pretty">{step.body}</p>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-5 py-16 lg:py-20">
+      <section className="mx-auto w-full max-w-[75rem] px-5 py-16 sm:px-8 lg:py-20">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl space-y-3">
-            <p className="text-sm font-medium text-primary">Trabajos</p>
-            <h2 className="text-3xl font-semibold tracking-tight text-balance">Negocios que ya lo están usando.</h2>
+            <Eyebrow>Trabajos</Eyebrow>
+            <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
+              Negocios que ya lo están usando.
+            </h2>
           </div>
           <Button asChild variant="ghost">
             <Link href="/trabajos">
-              Ver todos <ArrowRight />
+              Ver todos <ArrowRight className="transition-transform duration-[120ms] group-hover/button:translate-x-0.5" />
             </Link>
           </Button>
         </div>
@@ -247,29 +241,35 @@ export default function LandingPage() {
             <Link
               key={work.slug}
               href={`/trabajos/${work.slug}`}
-              className="group flex flex-col overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md"
+              className="group flex flex-col overflow-hidden rounded-md border border-n-200 bg-surface"
             >
-              <div className="h-36 w-full" style={{ background: `linear-gradient(135deg, ${work.accent}, color-mix(in oklch, ${work.accent} 45%, black))` }} />
+              <div className="flex aspect-[4/3] w-full items-center justify-center bg-paper-2 px-4">
+                <span className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-ink-3 text-center">
+                  {work.name}
+                </span>
+              </div>
               <div className="flex-1 space-y-2 p-5">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-ink-4">
                   <span>{verticalLabel(work.vertical)}</span>
                   <span aria-hidden="true">·</span>
                   <span>{work.city}</span>
                 </div>
-                <h3 className="font-medium group-hover:text-primary">{work.name}</h3>
-                <p className="text-sm text-muted-foreground text-pretty">{work.tagline}</p>
+                <h3 className="font-medium text-ink group-hover:text-brand">{work.name}</h3>
+                <p className="text-[0.9375rem] text-ink-3 text-pretty">{work.tagline}</p>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      <section id="precios" className="scroll-mt-20 border-y bg-muted/30">
-        <div className="mx-auto w-full max-w-6xl px-5 py-16 lg:py-20">
+      <section id="precios" className="scroll-mt-20 border-t border-n-200 bg-paper-2">
+        <div className="mx-auto w-full max-w-[75rem] px-5 py-16 sm:px-8 lg:py-20">
           <div className="max-w-2xl space-y-3">
-            <p className="text-sm font-medium text-primary">Precios</p>
-            <h2 className="text-3xl font-semibold tracking-tight text-balance">Precio cerrado antes de empezar.</h2>
-            <p className="text-muted-foreground text-pretty">
+            <Eyebrow>Precios</Eyebrow>
+            <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
+              Precio cerrado antes de empezar.
+            </h2>
+            <p className="text-[1.0625rem] leading-[1.55] text-ink-2 text-pretty">
               Valores de referencia en pesos, sin IVA. La cotización final sale de la primera charla y no se mueve
               después.
             </p>
@@ -281,26 +281,22 @@ export default function LandingPage() {
                 key={plan.name}
                 className={
                   plan.featured
-                    ? 'relative flex flex-col rounded-xl border-2 border-primary bg-card p-6 shadow-lg shadow-primary/10'
-                    : 'flex flex-col rounded-xl border bg-card p-6'
+                    ? 'flex flex-col rounded-md bg-paper-2 p-6'
+                    : 'flex flex-col rounded-md border border-n-200 bg-surface p-6'
                 }
               >
-                {plan.featured ? (
-                  <span className="absolute -top-3 left-6 rounded-full bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground">
-                    El más elegido
-                  </span>
-                ) : null}
+                {plan.featured ? <p className="text-[0.8125rem] font-medium text-brand">Recomendado</p> : null}
 
-                <h3 className="font-medium">{plan.name}</h3>
-                <p className="mt-3 text-2xl font-semibold tracking-tight">{plan.price}</p>
-                <p className="text-sm text-muted-foreground">{plan.period}</p>
-                <p className="mt-3 text-sm text-muted-foreground text-pretty">{plan.body}</p>
+                <h3 className="font-medium text-ink">{plan.name}</h3>
+                <p className="mt-3 text-2xl leading-none tracking-[-0.02em] font-semibold tnum text-ink">{plan.price}</p>
+                <p className="text-[0.8125rem] text-ink-3">{plan.period}</p>
+                <p className="mt-3 text-[0.9375rem] text-ink-2 text-pretty">{plan.body}</p>
 
-                <ul className="mt-5 flex-1 space-y-2.5 text-sm">
+                <ul className="mt-5 flex-1 space-y-2.5 text-[0.9375rem]">
                   {plan.items.map((item) => (
                     <li key={item} className="flex gap-2.5">
-                      <Check className="mt-0.5 size-4 shrink-0 text-primary" />
-                      <span className="text-muted-foreground">{item}</span>
+                      <Check className="mt-0.5 size-4 shrink-0 text-brand" />
+                      <span className="text-ink-2">{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -314,29 +310,31 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-3xl px-5 py-16 lg:py-20">
-        <h2 className="text-3xl font-semibold tracking-tight text-balance">Preguntas que nos hacen siempre.</h2>
-        <dl className="mt-8 divide-y border-t">
+      <section className="mx-auto w-full max-w-[45rem] px-5 py-16 sm:px-8 lg:py-20">
+        <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
+          Preguntas que nos hacen siempre.
+        </h2>
+        <dl className="mt-8 divide-y divide-n-200 border-t border-n-200">
           {faqs.map((faq) => (
             <div key={faq.q} className="py-5">
-              <dt className="font-medium">{faq.q}</dt>
-              <dd className="mt-1.5 text-sm text-muted-foreground text-pretty">{faq.a}</dd>
+              <dt className="font-medium text-ink">{faq.q}</dt>
+              <dd className="mt-1.5 text-[0.9375rem] text-ink-2 text-pretty">{faq.a}</dd>
             </div>
           ))}
         </dl>
       </section>
 
-      <section className="border-t bg-primary text-primary-foreground">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-6 px-5 py-14">
+      <section className="border-t border-n-200 bg-ink text-paper">
+        <div className="mx-auto flex w-full max-w-[75rem] flex-wrap items-center justify-between gap-6 px-5 py-14 sm:px-8">
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+            <h2 className="text-2xl leading-[1.15] tracking-[-0.015em] font-semibold text-balance sm:text-[2rem]">
               ¿Arrancamos con el tuyo?
             </h2>
-            <p className="max-w-lg text-primary-foreground/75 text-pretty">
+            <p className="max-w-lg text-[1.0625rem] leading-[1.55] text-paper/75 text-pretty">
               Contanos qué necesitás y te respondemos en el día con una propuesta concreta.
             </p>
           </div>
-          <Button asChild size="lg" variant="secondary">
+          <Button asChild size="lg" variant="outline" className="border-paper/30 bg-transparent text-paper hover:bg-paper/10">
             <Link href="/contacto">
               Pedir presupuesto <ArrowRight />
             </Link>

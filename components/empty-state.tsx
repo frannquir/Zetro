@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function EmptyState({
-  icon: Icon,
+  icon: _icon,
   title,
   description,
   action,
@@ -15,20 +15,10 @@ export function EmptyState({
   className?: string
 }) {
   return (
-    <div
-      className={cn(
-        'flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed bg-card/40 px-6 py-14 text-center',
-        className,
-      )}
-    >
-      {Icon ? (
-        <span className="flex size-11 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <Icon className="size-5" />
-        </span>
-      ) : null}
+    <div className={cn('flex flex-col items-start gap-3 rounded-md border border-n-200 bg-paper-2 px-5 py-8 sm:px-6', className)}>
       <div className="space-y-1">
-        <p className="font-medium">{title}</p>
-        {description ? <p className="mx-auto max-w-sm text-sm text-muted-foreground text-pretty">{description}</p> : null}
+        <p className="text-[1.0625rem] font-medium">{title}</p>
+        {description ? <p className="max-w-[48ch] text-[0.9375rem] text-ink-3 text-pretty">{description}</p> : null}
       </div>
       {action}
     </div>

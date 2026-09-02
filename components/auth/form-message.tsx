@@ -12,8 +12,8 @@ export function FormMessage({ error, notice }: { error?: string | null; notice?:
   }
   if (notice) {
     return (
-      <Alert className="border-success/30 bg-success/5">
-        <CircleCheckBig className="text-success" />
+      <Alert className="border-l-ok">
+        <CircleCheckBig className="text-ok" />
         <AlertDescription>{notice}</AlertDescription>
       </Alert>
     )

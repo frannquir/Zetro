@@ -3,7 +3,7 @@ import { listLeads } from '@/lib/data'
 import { PageHeader } from '@/components/page-header'
 import { EmptyState } from '@/components/empty-state'
 import { StatusBadge } from '@/components/status-badge'
-import { Inbox } from 'lucide-react'
+import { Card } from '@/components/ui/card'
 import { formatDateTime } from '@/lib/format'
 import { leadStatusLabel, leadStatusTone } from '@/lib/labels'
 
@@ -17,28 +17,30 @@ export default async function AdminLeadsPage() {
       <PageHeader title="Leads" description="Consultas que entraron por zetro.com." />
 
       {leads.length === 0 ? (
-        <EmptyState icon={Inbox} title="Todavía no llegó ninguna consulta" />
+        <EmptyState title="Todavía no llegó ninguna consulta" />
       ) : (
-        <ul className="space-y-3">
-          {leads.map((lead) => (
-            <li key={lead.id} className="rounded-xl border bg-card p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-medium">{lead.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {lead.email}
-                    {lead.phone ? ` · ${lead.phone}` : ''}
-                  </p>
+        <Card size="sm" className="overflow-hidden py-0">
+          <ul className="divide-y divide-n-200">
+            {leads.map((lead) => (
+              <li key={lead.id} className="px-4 py-3">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium text-ink">{lead.name}</p>
+                    <p className="text-[0.8125rem] text-ink-3">
+                      {lead.email}
+                      {lead.phone ? ` · ${lead.phone}` : ''}
+                    </p>
+                  </div>
+                  <StatusBadge tone={leadStatusTone(lead.status)}>{leadStatusLabel(lead.status)}</StatusBadge>
                 </div>
-                <StatusBadge tone={leadStatusTone(lead.status)}>{leadStatusLabel(lead.status)}</StatusBadge>
-              </div>
-              <p className="mt-3 text-sm text-pretty">{lead.message}</p>
-              <p className="mt-3 text-xs text-muted-foreground">
-                {formatDateTime(lead.createdAt, {})} · {lead.sourcePath ?? '—'}
-              </p>
-            </li>
-          ))}
-        </ul>
+                <p className="mt-3 text-[0.9375rem] text-ink text-pretty">{lead.message}</p>
+                <p className="mt-3 text-xs text-ink-4">
+                  {formatDateTime(lead.createdAt, {})} · {lead.sourcePath ?? '—'}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
     </>
   )

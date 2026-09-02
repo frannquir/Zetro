@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { CalendarDays, CalendarPlus } from 'lucide-react'
+import { CalendarPlus } from 'lucide-react'
 import {
   getAvailabilityRules,
   getBooking,
@@ -90,7 +90,6 @@ export default async function ReservasPage({ params, searchParams }: PageProps<'
 
         {bookings.length === 0 ? (
           <EmptyState
-            icon={CalendarDays}
             title={`No hay ${words.bookingPlural} con estos filtros`}
             description="Probá con otro rango de fechas o limpiá los filtros."
             action={
@@ -105,6 +104,7 @@ export default async function ReservasPage({ params, searchParams }: PageProps<'
             resources={activeResources}
             org={org}
             range={range}
+            date={date}
             hrefFor={(booking) => hrefFor(booking.id)}
           />
         ) : view === 'semana' ? (
@@ -116,7 +116,7 @@ export default async function ReservasPage({ params, searchParams }: PageProps<'
             hrefFor={(booking) => hrefFor(booking.id)}
           />
         ) : (
-          <div className="rounded-xl border bg-card">
+          <div className="rounded-md border border-n-200 bg-surface">
             <BookingList bookings={bookings} org={org} href={(booking) => hrefFor(booking.id)} />
           </div>
         )}

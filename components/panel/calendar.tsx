@@ -1,18 +1,22 @@
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { Booking, Org, Resource } from '@/lib/data'
 import { formatTime, formatWeekday } from '@/lib/format'
 import { bookingStatusLabel, bookingStatusTone } from '@/lib/labels'
-import { addDays, hourTicks, labelForMinutes, localDay, localMinutes } from '@/lib/booking/grid'
+import { addDays, hourTicks, labelForMinutes, localDay, localMinutes, todayIn } from '@/lib/booking/grid'
 import { cn } from '@/lib/utils'
 
-const pxPerHour = 68
+const pxPerHour = 72
 
 const blockTones: Record<string, string> = {
-  positive: 'bg-success/12 border-success/40 text-success-foreground',
-  warning: 'bg-warning/15 border-warning/45',
-  danger: 'bg-destructive/10 border-destructive/40 line-through opacity-70',
-  info: 'bg-primary/12 border-primary/40',
-  neutral: 'bg-muted border-border',
+  positive: 'bg-ok-soft border-l-ok text-ink',
+  warning: 'bg-warn-soft border-l-warn text-ink',
+  danger: 'bg-n-100 border-l-err text-ink-3 line-through decoration-ink-4',
+  info: 'bg-info-soft border-l-info text-ink',
+  neutral: 'bg-n-100 border-l-n-400 text-ink',
 }
 
 type Placed = { booking: Booking; top: number; height: number; lane: number; lanes: number }
@@ -34,7 +38,7 @@ function place(bookings: Booking[], timeZone: string, start: number, end: number
     return {
       booking,
       top: ((from - start) / 60) * pxPerHour,
-      height: Math.max(((to - from) / 60) * pxPerHour, 26),
+      height: Math.max(((to - from) / 60) * pxPerHour, 28),
       lane,
       lanes: 1,
     }
@@ -44,13 +48,19 @@ function place(bookings: Booking[], timeZone: string, start: number, end: number
   return rows.map((row) => ({ ...row, lanes }))
 }
 
+function halfHourTicks(start: number, end: number) {
+  const ticks: number[] = []
+  for (let minutes = Math.floor(start / 60) * 60; minutes <= end; minutes += 30) ticks.push(minutes)
+  return ticks
+}
+
 function TimeGutter({ start, end }: { start: number; end: number }) {
   return (
-    <div className="relative w-14 shrink-0" style={{ height: ((end - start) / 60) * pxPerHour }}>
+    <div className="relative w-12 shrink-0" style={{ height: ((end - start) / 60) * pxPerHour }}>
       {hourTicks(start, end).map((minutes) => (
         <span
           key={minutes}
-          className="absolute right-2 -translate-y-1/2 text-xs tabular-nums text-muted-foreground"
+          className="absolute right-2 -translate-y-1/2 text-[0.6875rem] leading-none tracking-[0.02em] font-medium tnum text-ink-4"
           style={{ top: ((minutes - start) / 60) * pxPerHour }}
         >
           {labelForMinutes(minutes)}
@@ -63,14 +73,36 @@ function TimeGutter({ start, end }: { start: number; end: number }) {
 function GridLines({ start, end }: { start: number; end: number }) {
   return (
     <>
-      {hourTicks(start, end).map((minutes) => (
+      {halfHourTicks(start, end).map((minutes) => (
         <span
           key={minutes}
-          className="pointer-events-none absolute inset-x-0 border-t border-border/70"
+          className={cn(
+            'pointer-events-none absolute inset-x-0 border-t',
+            minutes % 60 === 0 ? 'border-n-200' : 'border-n-100',
+          )}
           style={{ top: ((minutes - start) / 60) * pxPerHour }}
         />
       ))}
     </>
+  )
+}
+
+function NowLine({ start, end, timeZone }: { start: number; end: number; timeZone: string }) {
+  const router = useRouter()
+
+  useEffect(() => {
+    const id = setInterval(() => router.refresh(), 60_000)
+    return () => clearInterval(id)
+  }, [router])
+
+  const now = localMinutes(new Date().toISOString(), timeZone)
+  if (now < start || now > end) return null
+  const top = ((now - start) / 60) * pxPerHour
+
+  return (
+    <span className="pointer-events-none absolute inset-x-0 z-10 border-t border-brand" style={{ top }}>
+      <span className="absolute -top-[3px] -left-1.5 size-[6px] rounded-full bg-brand" />
+    </span>
   )
 }
 
@@ -92,7 +124,7 @@ function Block({
     <Link
       href={href}
       className={cn(
-        'absolute overflow-hidden rounded-md border px-2 py-1 text-xs transition-shadow hover:z-10 hover:shadow-md',
+        'absolute overflow-hidden rounded-sm border-l-[3px] px-2 py-1 text-[0.8125rem] leading-[1.3] transition-colors duration-[120ms] hover:z-10 hover:bg-surface focus-visible:z-10',
         blockTones[tone] ?? blockTones.neutral,
       )}
       style={{
@@ -103,11 +135,9 @@ function Block({
       }}
       title={`${formatTime(booking.startsAt, { timeZone: org.timeZone })} · ${booking.customer?.fullName ?? 'Sin nombre'} · ${bookingStatusLabel(booking.status)}`}
     >
-      <span className="block truncate font-medium text-foreground">
-        {booking.customer?.fullName ?? 'Sin nombre'}
-      </span>
-      {height > 40 ? (
-        <span className="block truncate text-muted-foreground">
+      <span className="block truncate font-medium">{booking.customer?.fullName ?? 'Sin nombre'}</span>
+      {height >= 44 ? (
+        <span className="block truncate tnum text-ink-3">
           {formatTime(booking.startsAt, { timeZone: org.timeZone })}
           {compact ? '' : ` · ${booking.resource.name}`}
         </span>
@@ -121,25 +151,28 @@ export function DayCalendar({
   resources,
   org,
   range,
+  date,
   hrefFor,
 }: {
   bookings: Booking[]
   resources: Resource[]
   org: Org
   range: { start: number; end: number }
+  date: string
   hrefFor: (booking: Booking) => string
 }) {
   const height = ((range.end - range.start) / 60) * pxPerHour
+  const isToday = date === todayIn(org.timeZone)
 
   return (
-    <div className="overflow-x-auto rounded-xl border bg-card">
+    <div className="overflow-x-auto rounded-md border border-n-200 bg-surface">
       <div className="min-w-[640px]">
-        <div className="sticky top-0 z-10 flex border-b bg-card/95 backdrop-blur-sm">
-          <div className="w-14 shrink-0" />
+        <div className="sticky top-0 z-10 flex border-b border-n-300 bg-paper-2">
+          <div className="w-12 shrink-0" />
           {resources.map((resource) => (
-            <div key={resource.id} className="min-w-0 flex-1 border-l px-3 py-2.5">
-              <p className="truncate text-sm font-medium">{resource.name}</p>
-              <p className="truncate text-xs text-muted-foreground">
+            <div key={resource.id} className="min-w-0 flex-1 border-l border-n-200 px-3 py-2.5">
+              <p className="truncate text-[0.9375rem] font-medium">{resource.name}</p>
+              <p className="truncate text-[0.8125rem] text-ink-3">
                 {resource.zone ?? `Capacidad ${resource.capacity}`}
               </p>
             </div>
@@ -156,8 +189,9 @@ export function DayCalendar({
               range.end,
             )
             return (
-              <div key={resource.id} className="relative min-w-0 flex-1 border-l" style={{ height }}>
+              <div key={resource.id} className="relative min-w-0 flex-1 border-l border-n-200" style={{ height }}>
                 <GridLines start={range.start} end={range.end} />
+                {isToday ? <NowLine start={range.start} end={range.end} timeZone={org.timeZone} /> : null}
                 {placed.map((item) => (
                   <Block key={item.booking.id} placed={item} org={org} href={hrefFor(item.booking)} compact />
                 ))}
@@ -188,16 +222,17 @@ export function WeekCalendar({
   const today = localDay(new Date().toISOString(), org.timeZone)
 
   return (
-    <div className="overflow-x-auto rounded-xl border bg-card">
+    <div className="overflow-x-auto rounded-md border border-n-200 bg-surface">
       <div className="min-w-[760px]">
-        <div className="sticky top-0 z-10 flex border-b bg-card/95 backdrop-blur-sm">
-          <div className="w-14 shrink-0" />
+        <div className="sticky top-0 z-10 flex border-b border-n-300 bg-paper-2">
+          <div className="w-12 shrink-0" />
           {days.map((day) => (
-            <div key={day} className={cn('min-w-0 flex-1 border-l px-3 py-2.5', day === today && 'bg-primary/5')}>
-              <p className="truncate text-sm font-medium first-letter:uppercase">
+            <div key={day} className="relative min-w-0 flex-1 border-l border-n-200 px-3 py-2.5">
+              <p className={cn('truncate text-[0.9375rem] font-medium first-letter:uppercase', day === today && 'text-brand')}>
                 {formatWeekday(`${day}T12:00:00Z`, { timeZone: org.timeZone })}
               </p>
-              <p className="text-xs tabular-nums text-muted-foreground">{day.slice(8, 10)}</p>
+              <p className="text-[0.8125rem] tnum text-ink-3">{day.slice(8, 10)}</p>
+              {day === today ? <span className="absolute inset-x-0 bottom-0 h-0.5 bg-brand" /> : null}
             </div>
           ))}
         </div>
@@ -212,12 +247,9 @@ export function WeekCalendar({
               range.end,
             )
             return (
-              <div
-                key={day}
-                className={cn('relative min-w-0 flex-1 border-l', day === today && 'bg-primary/5')}
-                style={{ height }}
-              >
+              <div key={day} className="relative min-w-0 flex-1 border-l border-n-200" style={{ height }}>
                 <GridLines start={range.start} end={range.end} />
+                {day === today ? <NowLine start={range.start} end={range.end} timeZone={org.timeZone} /> : null}
                 {placed.map((item) => (
                   <Block key={item.booking.id} placed={item} org={org} href={hrefFor(item.booking)} compact />
                 ))}

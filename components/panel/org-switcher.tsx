@@ -28,17 +28,17 @@ export function OrgSwitcher({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex w-full items-center gap-2.5 rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
+      <DropdownMenuTrigger className="flex w-full items-center gap-2.5 rounded-sm px-2 py-1.5 text-left transition-colors duration-[120ms] hover:bg-n-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-ink text-[0.8125rem] font-semibold text-paper">
           {active?.name.slice(0, 1).toUpperCase() ?? '?'}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium">{active?.name ?? 'Elegí un negocio'}</span>
-          <span className="block truncate text-xs text-muted-foreground">
+          <span className="block truncate text-[0.9375rem] font-medium text-ink">{active?.name ?? 'Elegí un negocio'}</span>
+          <span className="block truncate text-[0.8125rem] text-ink-3">
             {active ? `${verticalLabel(active.vertical)} · ${memberRoleLabel(active.role)}` : ''}
           </span>
         </span>
-        <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
+        <ChevronsUpDown className="size-4 shrink-0 text-ink-3" />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" className="w-64">

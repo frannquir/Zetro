@@ -30,14 +30,14 @@ export function UserMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex size-9 items-center justify-center rounded-full bg-muted text-xs font-semibold transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none">
+      <DropdownMenuTrigger className="flex size-9 items-center justify-center rounded-full bg-n-100 text-[0.8125rem] font-semibold text-ink transition-colors duration-[120ms] hover:bg-n-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
         {initials || <User className="size-4" />}
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
-          <span className="block text-sm font-medium">{fullName}</span>
-          <span className="block truncate text-xs text-muted-foreground">{email}</span>
+          <span className="block text-[0.9375rem] font-medium text-ink">{fullName}</span>
+          <span className="block truncate text-[0.8125rem] text-ink-3">{email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {settingsHref ? (

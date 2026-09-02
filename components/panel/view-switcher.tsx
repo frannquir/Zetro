@@ -3,8 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { addDays, todayIn } from '@/lib/booking/grid'
-import { cn } from '@/lib/utils'
 
 const views = [
   { value: 'lista', label: 'Lista' },
@@ -47,25 +47,22 @@ export function ViewSwitcher({
         <Button variant="ghost" size="sm" onClick={() => go({ fecha: todayIn(timeZone) })}>
           Hoy
         </Button>
-        <span className="ml-2 text-sm font-medium first-letter:uppercase">{label}</span>
+        <span className="ml-2 text-[0.9375rem] font-medium text-ink first-letter:uppercase">{label}</span>
       </div>
 
-      <div className="inline-flex rounded-lg border bg-card p-0.5">
-        {views.map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            onClick={() => go({ vista: item.value })}
-            aria-pressed={view === item.value}
-            className={cn(
-              'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-              view === item.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      <Tabs value={view} onValueChange={(value) => go({ vista: value })}>
+        <TabsList>
+          {views.map((item) => (
+            <TabsTrigger
+              key={item.value}
+              value={item.value}
+              className={item.value === 'semana' ? 'hidden sm:inline-flex' : undefined}
+            >
+              {item.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
     </div>
   )
 }

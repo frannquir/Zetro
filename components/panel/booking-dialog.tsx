@@ -62,11 +62,13 @@ export function BookingDialog({
         </DialogHeader>
 
         <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge tone={bookingStatusTone(booking.status)}>{bookingStatusLabel(booking.status)}</StatusBadge>
-          <span className="text-xs text-muted-foreground">Entró por {bookingSourceLabel(booking.source).toLowerCase()}</span>
+          <StatusBadge variant="solid" tone={bookingStatusTone(booking.status)}>
+            {bookingStatusLabel(booking.status)}
+          </StatusBadge>
+          <span className="text-[0.8125rem] text-ink-3">Entró por {bookingSourceLabel(booking.source).toLowerCase()}</span>
         </div>
 
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
+        <dl className="grid gap-3 text-[0.9375rem] sm:grid-cols-2">
           <Row icon={CalendarClock} label={words.resource} value={booking.resource.name} />
           {booking.service ? <Row icon={CalendarClock} label="Servicio" value={booking.service.name} /> : null}
           {words.showParty ? <Row icon={Users} label={words.party} value={String(booking.partySize)} /> : null}
@@ -77,19 +79,19 @@ export function BookingDialog({
         {booking.notes || booking.internalNotes ? (
           <>
             <Separator />
-            <div className="space-y-3 text-sm">
+            <div className="space-y-3 text-[0.9375rem]">
               {booking.notes ? (
                 <div>
                   <p className="flex items-center gap-1.5 font-medium">
                     <MessageSquare className="size-3.5" /> Nota del cliente
                   </p>
-                  <p className="mt-1 text-muted-foreground text-pretty">{booking.notes}</p>
+                  <p className="mt-1 text-ink-3 text-pretty">{booking.notes}</p>
                 </div>
               ) : null}
               {booking.internalNotes ? (
-                <div className="rounded-lg bg-muted p-3">
+                <div className="rounded-md bg-paper-2 p-3">
                   <p className="font-medium">Nota interna</p>
-                  <p className="mt-1 text-muted-foreground text-pretty">{booking.internalNotes}</p>
+                  <p className="mt-1 text-ink-3 text-pretty">{booking.internalNotes}</p>
                 </div>
               ) : null}
             </div>
@@ -129,10 +131,10 @@ function Row({
 }) {
   return (
     <div>
-      <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <dt className="flex items-center gap-1.5 text-xs text-ink-4">
         <Icon className="size-3.5" /> {label}
       </dt>
-      <dd className="mt-0.5 font-medium first-letter:uppercase">{value}</dd>
+      <dd className="mt-0.5 font-medium text-ink first-letter:uppercase">{value}</dd>
     </div>
   )
 }

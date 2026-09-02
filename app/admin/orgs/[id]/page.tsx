@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/page-header'
 import { StatCard } from '@/components/stat-card'
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { formatDateTime, formatNumber } from '@/lib/format'
 import { orgStatusLabel, orgStatusTone, paymentStatusLabel, paymentStatusTone, verticalLabel } from '@/lib/labels'
 
@@ -46,25 +47,29 @@ export default async function AdminOrgDetailPage({ params }: PageProps<'/admin/o
         />
       </div>
 
-      <section className="rounded-xl border bg-card p-5">
-        <h2 className="font-medium">Contacto</h2>
-        <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
-          <div>
-            <dt className="text-xs text-muted-foreground">Dueño</dt>
-            <dd>{item.ownerEmail ?? '—'}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">Teléfono</dt>
-            <dd>{item.org.phone ?? '—'}</dd>
-          </div>
-          <div className="sm:col-span-2">
-            <dt className="text-xs text-muted-foreground">Dirección</dt>
-            <dd>{item.org.address ?? '—'}</dd>
-          </div>
-        </dl>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Contacto</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <dl className="grid gap-3 text-[0.9375rem] sm:grid-cols-2">
+            <div>
+              <dt className="text-xs text-ink-4">Dueño</dt>
+              <dd className="text-ink">{item.ownerEmail ?? '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-ink-4">Teléfono</dt>
+              <dd className="text-ink">{item.org.phone ?? '—'}</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-xs text-ink-4">Dirección</dt>
+              <dd className="text-ink">{item.org.address ?? '—'}</dd>
+            </div>
+          </dl>
+        </CardContent>
+      </Card>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-ink-4">
         Cada vez que entrás a los datos de un cliente del que no sos miembro, queda registrado en el log de auditoría.
       </p>
     </>

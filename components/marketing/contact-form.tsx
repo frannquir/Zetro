@@ -61,8 +61,8 @@ export function ContactForm() {
 
   if (done) {
     return (
-      <Alert className="border-success/30 bg-success/5">
-        <CircleCheckBig className="text-success" />
+      <Alert className="border-l-ok">
+        <CircleCheckBig className="text-ok" />
         <AlertTitle>Nos llegó</AlertTitle>
         <AlertDescription>Te respondemos en el día hábil. Si es urgente, escribinos a hola@zetro.com.</AlertDescription>
       </Alert>
@@ -106,7 +106,7 @@ export function ContactForm() {
         {pending ? 'Enviando' : 'Enviar consulta'}
       </Button>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-ink-4">
         Usamos tus datos solo para responderte. No los compartimos con nadie.
       </p>
     </form>
@@ -130,10 +130,10 @@ function Field({
     <div className="space-y-2">
       <div className="flex items-baseline justify-between gap-2">
         <Label htmlFor={id}>{label}</Label>
-        {hint ? <span className="text-xs text-muted-foreground">{hint}</span> : null}
+        {hint ? <span className="text-xs text-ink-4">{hint}</span> : null}
       </div>
       {children}
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      {error ? <p className="text-xs text-err">{error}</p> : null}
     </div>
   )
 }

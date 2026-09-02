@@ -127,11 +127,11 @@ export function NewBookingForm({
               Buscar horarios
             </Button>
           ) : loadingSlots ? (
-            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <p className="flex items-center gap-2 text-[0.9375rem] text-ink-3">
               <Loader2 className="size-4 animate-spin" /> Buscando
             </p>
           ) : slots.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No hay horarios libres ese día. Probá otra fecha.</p>
+            <p className="text-[0.9375rem] text-ink-3">No hay horarios libres ese día. Probá otra fecha.</p>
           ) : (
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
               {slots.map((slot) => (
@@ -141,8 +141,8 @@ export function NewBookingForm({
                   onClick={() => setSelected(slot)}
                   className={
                     selected?.startsAt === slot.startsAt && selected.resourceId === slot.resourceId
-                      ? 'rounded-md border-2 border-primary bg-primary/10 px-2 py-1.5 text-sm font-medium'
-                      : 'rounded-md border px-2 py-1.5 text-sm hover:border-primary/50'
+                      ? 'rounded-sm border border-brand bg-brand-soft px-2 py-1.5 text-[0.8125rem] font-medium tnum text-ink'
+                      : 'rounded-sm border border-n-300 px-2 py-1.5 text-[0.8125rem] tnum text-ink hover:border-brand/50'
                   }
                 >
                   {formatTime(slot.startsAt, { timeZone: org.timeZone })}
@@ -151,7 +151,7 @@ export function NewBookingForm({
             </div>
           )}
           {selected ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-[0.9375rem] text-ink-3">
               {selected.resourceName} · {formatTime(selected.startsAt, { timeZone: org.timeZone })}
             </p>
           ) : null}

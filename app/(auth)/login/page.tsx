@@ -17,7 +17,7 @@ export default async function LoginPage({ searchParams }: PageProps<'/login'>) {
       footer={
         <>
           ¿Todavía no trabajás con nosotros?{' '}
-          <Link href="/contacto" className="font-medium text-foreground hover:underline">
+          <Link href="/contacto" className="font-medium text-ink hover:underline">
             Pedí un presupuesto
           </Link>
         </>

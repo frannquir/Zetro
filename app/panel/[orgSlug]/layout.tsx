@@ -19,20 +19,22 @@ export default async function PanelLayout({ children, params }: LayoutProps<'/pa
   }))
 
   return (
-    <div className="flex min-h-dvh bg-muted/30">
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-6 border-r bg-sidebar px-4 py-5 lg:flex">
-        <OrgSwitcher orgs={orgs} current={orgSlug} isPlatformAdmin={viewer.isPlatformAdmin} />
-        <div className="flex-1 overflow-y-auto">
+    <div className="flex min-h-dvh bg-paper">
+      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-n-200 bg-paper-2 lg:flex">
+        <div className="flex h-14 items-center border-b border-n-200 px-3">
+          <OrgSwitcher orgs={orgs} current={orgSlug} isPlatformAdmin={viewer.isPlatformAdmin} />
+        </div>
+        <div className="flex-1 overflow-y-auto px-3 py-4">
           <SidebarNav context={context} />
         </div>
-        <p className="px-3 text-xs text-muted-foreground">Zetro · {org.name}</p>
+        <div className="border-t border-n-200 px-4 py-3 text-[0.8125rem] text-ink-4">Zetro</div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b bg-background/85 px-4 backdrop-blur-md sm:px-6">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-n-200 bg-paper px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
             <MobileNav context={context} orgs={orgs} isPlatformAdmin={viewer.isPlatformAdmin} />
-            <span className="truncate font-medium lg:hidden">{org.name}</span>
+            <span className="truncate font-medium text-[0.9375rem] lg:hidden">{org.name}</span>
           </div>
           <UserMenu
             fullName={viewer.fullName}

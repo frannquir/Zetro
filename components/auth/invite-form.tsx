@@ -29,7 +29,7 @@ export function InviteForm({ token }: { token: string }) {
         Aceptar invitación
       </SubmitButton>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-ink-4">
         Las invitaciones vencen a los 7 días. Si esta ya venció, pedile al dueño de la cuenta que te mande otra.
       </p>
     </form>

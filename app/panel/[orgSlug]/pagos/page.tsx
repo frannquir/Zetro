@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
-import { CreditCard } from 'lucide-react'
 import { getMembership, getPayments } from '@/lib/data'
 import { PageHeader } from '@/components/page-header'
 import { EmptyState } from '@/components/empty-state'
 import { StatusBadge } from '@/components/status-badge'
+import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatMonth, formatMoney, formatDate } from '@/lib/format'
 import { paymentStatusLabel, paymentStatusTone } from '@/lib/labels'
@@ -20,9 +20,9 @@ export default async function PagosPage({ params }: PageProps<'/panel/[orgSlug]/
       <PageHeader title="Pagos" description="Lo carga Zetro a mano cada mes. Acá solo mirás el estado." />
 
       {payments.length === 0 ? (
-        <EmptyState icon={CreditCard} title="Todavía no hay pagos registrados" />
+        <EmptyState title="Todavía no hay pagos registrados" />
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-card">
+        <Card size="sm" className="overflow-hidden py-0">
           <Table>
             <TableHeader>
               <TableRow>
@@ -55,7 +55,7 @@ export default async function PagosPage({ params }: PageProps<'/panel/[orgSlug]/
               ))}
             </TableBody>
           </Table>
-        </div>
+        </Card>
       )}
     </>
   )

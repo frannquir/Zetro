@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Radio } from 'lucide-react'
 import { formatNumber } from '@/lib/format'
+import { cn } from '@/lib/utils'
 
 // realtime is off in v1, so the tile just refetches on an interval
 export function LiveVisitors({ count, intervalMs = 30_000 }: { count: number; intervalMs?: number }) {
@@ -15,13 +15,13 @@ export function LiveVisitors({ count, intervalMs = 30_000 }: { count: number; in
   }, [router, intervalMs])
 
   return (
-    <div className="rounded-xl border bg-card p-4 shadow-xs">
+    <div className="flex flex-col gap-2 rounded-md border border-n-200 bg-surface p-4">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm text-muted-foreground">Personas ahora</span>
-        <Radio className={count > 0 ? 'size-4 animate-pulse text-success' : 'size-4 text-muted-foreground'} />
+        <span className="text-[0.8125rem] font-medium text-ink-3">Personas ahora</span>
+        <span className={cn('size-2 rounded-full', count > 0 ? 'bg-ok' : 'bg-n-400')} />
       </div>
-      <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums">{formatNumber(count)}</p>
-      <p className="mt-1 text-xs text-muted-foreground">En tu sitio en los últimos 30 minutos</p>
+      <span className="text-[1.75rem] leading-none tracking-[-0.02em] font-semibold tnum">{formatNumber(count)}</span>
+      <span className="text-[0.8125rem] text-ink-4 tnum">En tu sitio en los últimos 30 minutos</span>
     </div>
   )
 }

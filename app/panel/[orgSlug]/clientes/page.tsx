@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
-import { Users } from 'lucide-react'
 import { getCustomerHistory, getMembership, listCustomers } from '@/lib/data'
 import { PageHeader } from '@/components/page-header'
 import { EmptyState } from '@/components/empty-state'
 import { SearchBox } from '@/components/panel/search-box'
 import { CustomerDrawer } from '@/components/panel/customer-drawer'
+import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatDateTime } from '@/lib/format'
 
@@ -40,12 +40,11 @@ export default async function ClientesPage({ params, searchParams }: PageProps<'
 
       {customers.length === 0 ? (
         <EmptyState
-          icon={Users}
           title="Todavía no hay clientes"
           description="En cuanto entre la primera reserva, el cliente aparece acá."
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-card">
+        <Card size="sm" className="overflow-hidden py-0">
           <Table>
             <TableHeader>
               <TableRow>
@@ -74,7 +73,7 @@ export default async function ClientesPage({ params, searchParams }: PageProps<'
               ))}
             </TableBody>
           </Table>
-        </div>
+        </Card>
       )}
 
       {selected ? <CustomerDrawer customer={selected} history={history} org={org} /> : null}

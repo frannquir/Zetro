@@ -1,5 +1,4 @@
 import type { LucideIcon } from 'lucide-react'
-import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
 import { formatDelta } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -8,7 +7,8 @@ export function StatCard({
   value,
   hint,
   delta,
-  icon: Icon,
+  icon: _icon,
+  inline = false,
   className,
 }: {
   label: string
@@ -16,30 +16,28 @@ export function StatCard({
   hint?: string
   delta?: number | null
   icon?: LucideIcon
+  inline?: boolean
   className?: string
 }) {
   const up = (delta ?? 0) >= 0
   return (
-    <div className={cn('rounded-xl border bg-card p-4 shadow-xs', className)}>
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-sm text-muted-foreground">{label}</span>
-        {Icon ? <Icon className="size-4 text-muted-foreground" /> : null}
-      </div>
-      <div className="mt-2 flex items-baseline gap-2">
-        <span className="text-2xl font-semibold tracking-tight tabular-nums">{value}</span>
+    <div
+      className={cn(
+        'flex flex-col gap-2 rounded-md border border-n-200 bg-surface p-4',
+        inline && 'border-0 bg-transparent p-0',
+        className,
+      )}
+    >
+      <span className="text-[0.8125rem] font-medium text-ink-3">{label}</span>
+      <div className="flex items-baseline gap-2">
+        <span className="text-[1.75rem] leading-none tracking-[-0.02em] font-semibold tnum">{value}</span>
         {delta === null || delta === undefined ? null : (
-          <span
-            className={cn(
-              'inline-flex items-center gap-0.5 text-xs font-medium',
-              up ? 'text-success' : 'text-destructive',
-            )}
-          >
-            {up ? <ArrowUpRight className="size-3.5" /> : <ArrowDownRight className="size-3.5" />}
+          <span className={cn('text-[0.8125rem] font-medium tnum', up ? 'text-ok' : 'text-err')}>
             {formatDelta(delta)}
           </span>
         )}
       </div>
-      {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
+      {hint ? <span className="text-[0.8125rem] text-ink-4 tnum">{hint}</span> : null}
     </div>
   )
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Mail, UserPlus } from 'lucide-react'
 import { getInvites, getMembers, getMembership } from '@/lib/data'
 import { StatusBadge } from '@/components/status-badge'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -19,19 +20,19 @@ export default async function EquipoPage({ params }: PageProps<'/panel/[orgSlug]
     <div className="max-w-2xl space-y-8">
       <section className="space-y-3">
         <h2 className="font-medium">Miembros</h2>
-        <div className="overflow-hidden rounded-xl border bg-card">
-          <ul className="divide-y">
+        <Card size="sm" className="overflow-hidden py-0">
+          <ul className="divide-y divide-n-200">
             {members.map((member) => (
               <li key={member.id} className="flex items-center justify-between gap-4 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{member.fullName}</p>
-                  <p className="truncate text-xs text-muted-foreground">{member.email}</p>
+                  <p className="truncate text-[0.9375rem] font-medium text-ink">{member.fullName}</p>
+                  <p className="truncate text-[0.8125rem] text-ink-3">{member.email}</p>
                 </div>
                 <StatusBadge tone="neutral">{memberRoleLabel(member.role)}</StatusBadge>
               </li>
             ))}
           </ul>
-        </div>
+        </Card>
       </section>
 
       <section className="space-y-3">
@@ -58,13 +59,13 @@ export default async function EquipoPage({ params }: PageProps<'/panel/[orgSlug]
         </form>
 
         {invites.length > 0 ? (
-          <ul className="space-y-2">
+          <ul className="divide-y divide-n-200 rounded-md border border-n-200 bg-paper-2">
             {invites.map((invite) => (
-              <li key={invite.id} className="flex items-center justify-between gap-4 rounded-lg border bg-muted/30 px-4 py-2.5 text-sm">
-                <span className="flex items-center gap-2 text-muted-foreground">
+              <li key={invite.id} className="flex items-center justify-between gap-4 px-4 py-2.5 text-[0.9375rem]">
+                <span className="flex items-center gap-2 text-ink-3">
                   <Mail className="size-3.5" /> {invite.email}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-[0.8125rem] text-ink-3">
                   {memberRoleLabel(invite.role)} · vence el {formatDateLong(invite.expiresAt, { timeZone: org.timeZone })}
                 </span>
               </li>

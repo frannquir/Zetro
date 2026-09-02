@@ -5,6 +5,7 @@ import { listAdminOrgs } from '@/lib/data'
 import { PageHeader } from '@/components/page-header'
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatDateTime, formatNumber } from '@/lib/format'
 import { orgStatusLabel, orgStatusTone, paymentStatusLabel, paymentStatusTone, verticalLabel } from '@/lib/labels'
@@ -28,7 +29,7 @@ export default async function AdminOrgsPage() {
         }
       />
 
-      <div className="overflow-hidden rounded-xl border bg-card">
+      <Card size="sm" className="overflow-hidden py-0">
         <Table>
           <TableHeader>
             <TableRow>
@@ -70,7 +71,7 @@ export default async function AdminOrgsPage() {
             ))}
           </TableBody>
         </Table>
-      </div>
+      </Card>
     </>
   )
 }

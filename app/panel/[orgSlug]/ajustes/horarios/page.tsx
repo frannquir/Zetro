@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { CalendarOff } from 'lucide-react'
 import { getAvailabilityExceptions, getAvailabilityRules, getMembership } from '@/lib/data'
 import { StatusBadge } from '@/components/status-badge'
+import { Card } from '@/components/ui/card'
 import { formatDateLong } from '@/lib/format'
 
 export const metadata: Metadata = { title: 'Horarios — Zetro' }
@@ -23,21 +24,21 @@ export default async function HorariosPage({ params }: PageProps<'/panel/[orgSlu
     <div className="max-w-2xl space-y-8">
       <section className="space-y-3">
         <h2 className="font-medium">Horario semanal</h2>
-        <div className="overflow-hidden rounded-xl border bg-card">
-          <ul className="divide-y">
+        <Card size="sm" className="overflow-hidden py-0">
+          <ul className="divide-y divide-n-200">
             {weekdays.map((label, weekday) => {
               const day = byWeekday.get(weekday)
               return (
                 <li key={weekday} className="flex items-center justify-between gap-4 px-4 py-3">
-                  <span className="text-sm font-medium">{label}</span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-[0.9375rem] font-medium text-ink">{label}</span>
+                  <span className="text-[0.9375rem] tnum text-ink-3">
                     {day ? day.map((rule) => `${rule.opensAt}–${rule.closesAt}`).join(' y ') : 'Cerrado'}
                   </span>
                 </li>
               )
             })}
           </ul>
-        </div>
+        </Card>
       </section>
 
       <section className="space-y-3">
@@ -45,16 +46,16 @@ export default async function HorariosPage({ params }: PageProps<'/panel/[orgSlu
           <CalendarOff className="size-4" /> Excepciones
         </h2>
         {exceptions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No hay feriados ni horarios especiales cargados.</p>
+          <p className="text-[0.9375rem] text-ink-3">No hay feriados ni horarios especiales cargados.</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="divide-y divide-n-200 rounded-md border border-n-200">
             {exceptions.map((exception) => (
-              <li key={exception.id} className="flex items-center justify-between gap-4 rounded-lg border bg-card px-4 py-3">
+              <li key={exception.id} className="flex items-center justify-between gap-4 px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium first-letter:uppercase">
+                  <p className="text-[0.9375rem] font-medium text-ink first-letter:uppercase">
                     {formatDateLong(`${exception.date}T12:00:00Z`, { timeZone: org.timeZone })}
                   </p>
-                  {exception.note ? <p className="text-xs text-muted-foreground">{exception.note}</p> : null}
+                  {exception.note ? <p className="text-[0.8125rem] text-ink-3">{exception.note}</p> : null}
                 </div>
                 <StatusBadge tone={exception.isClosed ? 'danger' : 'warning'}>
                   {exception.isClosed ? 'Cerrado' : `${exception.opensAt}–${exception.closesAt}`}

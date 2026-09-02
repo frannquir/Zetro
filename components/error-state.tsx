@@ -1,4 +1,4 @@
-import { TriangleAlert } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 export function ErrorState({
@@ -15,18 +15,15 @@ export function ErrorState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center gap-3 rounded-xl border border-destructive/25 bg-destructive/5 px-6 py-14 text-center',
+        'flex flex-col items-start gap-3 rounded-md border border-n-200 border-l-[3px] border-l-err bg-surface px-5 py-6',
         className,
       )}
     >
-      <span className="flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-        <TriangleAlert className="size-5" />
-      </span>
       <div className="space-y-1">
-        <p className="font-medium">{title}</p>
-        <p className="mx-auto max-w-sm text-sm text-muted-foreground text-pretty">{description}</p>
+        <p className="text-[1.0625rem] font-medium">{title}</p>
+        <p className="max-w-[48ch] text-[0.9375rem] text-ink-3">{description}</p>
       </div>
-      {action}
+      {action ?? <Button variant="outline" size="sm">Reintentar</Button>}
     </div>
   )
 }

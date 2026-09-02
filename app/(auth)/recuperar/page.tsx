@@ -18,7 +18,7 @@ export default async function RecuperarPage({ searchParams }: PageProps<'/recupe
           : 'Poné tu mail y te mandamos un enlace para volver a entrar.'
       }
       footer={
-        <Link href="/login" className="font-medium text-foreground hover:underline">
+        <Link href="/login" className="font-medium text-ink hover:underline">
           Volver a entrar
         </Link>
       }

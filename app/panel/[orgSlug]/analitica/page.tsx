@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
-import { Eye, MousePointerClick, TrendingDown, Users } from 'lucide-react'
 import { getAnalytics, getMembership } from '@/lib/data'
 import { PageHeader } from '@/components/page-header'
 import { StatCard } from '@/components/stat-card'
+import { EmptyState } from '@/components/empty-state'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { LineChart } from '@/components/charts/line-chart'
 import { AnalyticsBreakdowns } from '@/components/panel/analytics-breakdowns'
 import { formatNumber, formatPercent } from '@/lib/format'
@@ -21,36 +22,47 @@ export default async function AnaliticaPage({ params }: PageProps<'/panel/[orgSl
     <>
       <PageHeader title="Analítica" description="De dónde viene la gente y cuántos terminan reservando. Últimos 30 días." />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Visitas" value={formatNumber(analytics.pageviews)} delta={analytics.deltas.pageviews} icon={Eye} />
-        <StatCard label="Visitantes únicos" value={formatNumber(analytics.visitors)} delta={analytics.deltas.visitors} icon={Users} />
-        <StatCard
-          label="Rebote"
-          value={formatPercent(analytics.bounceRate)}
-          delta={analytics.deltas.bounceRate}
-          icon={TrendingDown}
-        />
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard label="Visitas" value={formatNumber(analytics.pageviews)} delta={analytics.deltas.pageviews} />
+        <StatCard label="Visitantes únicos" value={formatNumber(analytics.visitors)} delta={analytics.deltas.visitors} />
+        <StatCard label="Rebote" value={formatPercent(analytics.bounceRate)} delta={analytics.deltas.bounceRate} />
         <StatCard
           label="Reservas desde el sitio"
           value={formatNumber(analytics.bookings)}
           hint={`${formatPercent(conversion)} de las visitas`}
-          icon={MousePointerClick}
         />
       </div>
 
-      <section className="rounded-xl border bg-card p-4 sm:p-6">
-        <h2 className="font-medium">Visitas por día</h2>
-        <div className="mt-4">
-          <LineChart data={chart} height={220} ariaLabel="Visitas por día en los últimos 30 días" />
-        </div>
-      </section>
+      <Card>
+        <CardHeader className="flex flex-row items-baseline justify-between gap-2">
+          <CardTitle>Visitas por día</CardTitle>
+          <span className="text-[0.9375rem] font-medium tnum text-ink">{formatNumber(analytics.pageviews)}</span>
+        </CardHeader>
+        <CardContent>
+          {chart.length === 0 ? (
+            <EmptyState
+              className="border-0 bg-transparent px-0 py-8"
+              title="Todavía no hay visitas"
+              description="Cuando el sitio esté en línea, acá vas a ver cuánta gente entra por día."
+            />
+          ) : chart.length < 3 ? (
+            <p className="text-[1.75rem] leading-none tracking-[-0.02em] font-semibold tnum">
+              {formatNumber(analytics.pageviews)}
+            </p>
+          ) : (
+            <LineChart data={chart} height={220} ariaLabel={`Visitas por día, últimos 30 días, total ${formatNumber(analytics.pageviews)}`} />
+          )}
+        </CardContent>
+      </Card>
 
-      <section className="rounded-xl border bg-card p-4 sm:p-6">
-        <h2 className="font-medium">Detalle</h2>
-        <div className="mt-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Detalle</CardTitle>
+        </CardHeader>
+        <CardContent>
           <AnalyticsBreakdowns orgSlug={orgSlug} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
     </>
   )
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { listAllPayments } from '@/lib/data'
 import { PageHeader } from '@/components/page-header'
 import { StatusBadge } from '@/components/status-badge'
+import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatMonth, formatMoney } from '@/lib/format'
 import { paymentStatusLabel, paymentStatusTone } from '@/lib/labels'
@@ -15,7 +16,7 @@ export default async function AdminPagosPage() {
     <>
       <PageHeader title="Pagos" description="Bookkeeping manual, sin proveedor de pagos. Se carga a mano cada mes." />
 
-      <div className="overflow-hidden rounded-xl border bg-card">
+      <Card size="sm" className="overflow-hidden py-0">
         <Table>
           <TableHeader>
             <TableRow>
@@ -40,7 +41,7 @@ export default async function AdminPagosPage() {
             ))}
           </TableBody>
         </Table>
-      </div>
+      </Card>
     </>
   )
 }

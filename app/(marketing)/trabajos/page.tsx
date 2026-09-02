@@ -11,13 +11,13 @@ export const metadata: Metadata = {
 
 export default function TrabajosPage() {
   return (
-    <div className="mx-auto w-full max-w-6xl px-5 py-14 lg:py-20">
+    <div className="mx-auto w-full max-w-[75rem] px-5 py-14 sm:px-8 lg:py-20">
       <div className="max-w-2xl space-y-3">
-        <p className="text-sm font-medium text-primary">Trabajos</p>
-        <h1 className="text-4xl font-semibold tracking-tight text-balance">
+        <p className="text-xs leading-none tracking-[0.06em] uppercase font-medium text-ink-4">Trabajos</p>
+        <h1 className="text-[2.75rem] leading-[1.08] tracking-[-0.025em] font-semibold text-balance text-ink">
           Cada uno tenía un problema distinto. La solución se parece bastante.
         </h1>
-        <p className="text-muted-foreground text-pretty">
+        <p className="text-[1.0625rem] leading-[1.55] text-ink-2 text-pretty">
           Sitio rápido adelante, panel ordenado atrás. Lo que cambia es el vocabulario: mesas, sillones, salas.
         </p>
       </div>
@@ -27,24 +27,25 @@ export default function TrabajosPage() {
           <Link
             key={work.slug}
             href={`/trabajos/${work.slug}`}
-            className="group flex flex-col overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md"
+            className="group flex flex-col overflow-hidden rounded-md border border-n-200 bg-surface"
           >
-            <div
-              className="h-40 w-full"
-              style={{ background: `linear-gradient(135deg, ${work.accent}, color-mix(in oklch, ${work.accent} 45%, black))` }}
-            />
+            <div className="flex aspect-[4/3] w-full items-center justify-center bg-paper-2 px-4">
+              <span className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-ink-3 text-center">
+                {work.name}
+              </span>
+            </div>
             <div className="flex flex-1 flex-col gap-2 p-5">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2 text-xs text-ink-4">
                 <span>{verticalLabel(work.vertical)}</span>
                 <span aria-hidden="true">·</span>
                 <span>{work.city}</span>
                 <span aria-hidden="true">·</span>
-                <span className="tabular-nums">{work.year}</span>
+                <span className="tnum">{work.year}</span>
               </div>
-              <h2 className="font-medium group-hover:text-primary">{work.name}</h2>
-              <p className="flex-1 text-sm text-muted-foreground text-pretty">{work.summary}</p>
-              <span className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                Ver el caso <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              <h2 className="font-medium text-ink group-hover:text-brand">{work.name}</h2>
+              <p className="flex-1 text-[0.9375rem] text-ink-3 text-pretty">{work.summary}</p>
+              <span className="mt-2 inline-flex items-center gap-1 text-[0.9375rem] font-medium text-brand">
+                Ver el caso <ArrowRight className="size-4 transition-transform duration-[120ms] group-hover:translate-x-0.5" />
               </span>
             </div>
           </Link>

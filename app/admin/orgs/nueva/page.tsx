@@ -13,7 +13,7 @@ export default function NuevoClientePage() {
     <>
       <PageHeader title="Nuevo cliente" description="Crea el negocio y manda la invitación al dueño." />
 
-      <form className="max-w-xl space-y-5 rounded-xl border bg-card p-6">
+      <form className="max-w-xl space-y-5 rounded-md border border-n-200 bg-surface p-6">
         <SettingsField id="name" label="Nombre del negocio">
           <Input id="name" placeholder="Bar Chelo" required />
         </SettingsField>

@@ -18,11 +18,11 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-5">
-        <Link href="/" className="flex items-center gap-2 rounded-md focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none">
+    <header className="sticky top-0 z-40 h-14 border-b border-n-200 bg-paper">
+      <div className="mx-auto flex h-14 w-full max-w-[75rem] items-center justify-between gap-4 px-5 sm:px-8">
+        <Link href="/" className="flex items-center gap-2 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
           <Logo className="size-7" />
-          <span className="text-lg font-semibold tracking-tight">Zetro</span>
+          <span className="text-lg font-semibold tracking-tight text-ink">Zetro</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -30,7 +30,7 @@ export function SiteHeader() {
             <Link
               key={link.href}
               href={link.href}
-              className="rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-sm px-3 py-2 text-[0.9375rem] text-ink-2 transition-colors duration-[120ms] hover:text-ink"
             >
               {link.label}
             </Link>
@@ -61,7 +61,7 @@ export function SiteHeader() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className="rounded-md px-3 py-2.5 text-sm font-medium hover:bg-accent"
+                    className="rounded-sm px-3 py-2.5 text-[0.9375rem] font-medium text-ink hover:bg-n-100"
                   >
                     {link.label}
                   </Link>

@@ -6,17 +6,15 @@ export type BarRow = { label: string; value: number; hint?: string }
 export function BarList({ rows, className }: { rows: BarRow[]; className?: string }) {
   const max = Math.max(...rows.map((r) => r.value), 1)
   return (
-    <ul className={cn('space-y-1', className)}>
+    <ul className={cn(className)}>
       {rows.map((row) => (
-        <li key={row.label} className="relative isolate flex items-center justify-between gap-4 rounded-md px-2.5 py-2 text-sm">
+        <li key={row.label} className="relative isolate grid h-9 grid-cols-[1fr_auto] items-center gap-4 px-2 text-[0.9375rem]">
           <span
-            className="absolute inset-y-0 left-0 -z-10 rounded-md bg-primary/10"
+            className="absolute inset-y-1.5 left-0 -z-10 rounded-r-sm bg-brand-soft"
             style={{ width: `${Math.max((row.value / max) * 100, 3)}%` }}
           />
-          <span className="truncate font-medium">{row.label}</span>
-          <span className="shrink-0 tabular-nums text-muted-foreground">
-            {row.hint ?? formatNumber(row.value)}
-          </span>
+          <span className="truncate text-ink">{row.label}</span>
+          <span className="tnum text-ink-3">{row.hint ?? formatNumber(row.value)}</span>
         </li>
       ))}
     </ul>

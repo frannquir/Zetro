@@ -23,8 +23,8 @@ export default async function PanelIndexPage() {
       </div>
 
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">¿Con cuál trabajamos hoy?</h1>
-        <p className="text-sm text-muted-foreground">Tenés acceso a más de un negocio.</p>
+        <h1 className="text-2xl leading-tight tracking-[-0.015em] font-semibold">¿Con cuál trabajamos hoy?</h1>
+        <p className="text-[0.9375rem] text-ink-3">Tenés acceso a más de un negocio.</p>
       </div>
 
       {viewer.memberships.length === 0 ? (
@@ -33,23 +33,23 @@ export default async function PanelIndexPage() {
           description="Pedile al dueño de la cuenta que te mande una invitación al mail con el que entraste."
         />
       ) : (
-        <ul className="space-y-2">
+        <ul className="divide-y divide-n-200 rounded-md border border-n-200">
           {viewer.memberships.map(({ org, role }) => (
             <li key={org.slug}>
               <Link
                 href={`/panel/${org.slug}`}
-                className="group flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:border-primary/40"
+                className="group flex items-center gap-3 px-4 py-3 transition-colors duration-[120ms] hover:bg-n-100"
               >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ink text-[0.8125rem] font-semibold text-paper">
                   {org.name.slice(0, 1).toUpperCase()}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium">{org.name}</span>
-                  <span className="block truncate text-sm text-muted-foreground">
+                  <span className="block truncate font-medium text-ink">{org.name}</span>
+                  <span className="block truncate text-[0.8125rem] text-ink-3">
                     {verticalLabel(org.vertical)} · {memberRoleLabel(role)}
                   </span>
                 </span>
-                <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight className="size-4 text-ink-3 transition-transform duration-[120ms] group-hover:translate-x-0.5" />
               </Link>
             </li>
           ))}

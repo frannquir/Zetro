@@ -20,19 +20,19 @@ export function BookingList({
   const words = vocabularyFor(org.vertical)
 
   return (
-    <ul className={cn('divide-y', className)}>
+    <ul className={cn('divide-y divide-n-200', className)}>
       {bookings.map((booking) => {
         const body = (
           <>
-            <span className="w-14 shrink-0 text-sm font-medium tabular-nums">
+            <span className="w-12 shrink-0 text-[0.9375rem] font-medium tnum">
               {formatTime(booking.startsAt, { timeZone: org.timeZone })}
             </span>
 
             <span className="min-w-0 flex-1">
-              <span className="block truncate font-medium">
+              <span className="block truncate text-[0.9375rem] font-medium text-ink">
                 {booking.customer?.fullName ?? 'Sin nombre'}
               </span>
-              <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted-foreground">
+              <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[0.8125rem] leading-[1.4] text-ink-3">
                 <span className="truncate">{booking.resource.name}</span>
                 {booking.service ? (
                   <>
@@ -52,7 +52,7 @@ export function BookingList({
               </span>
             </span>
 
-            <span className="hidden shrink-0 text-sm text-muted-foreground sm:block">
+            <span className="hidden shrink-0 text-[0.8125rem] leading-[1.4] text-ink-4 sm:block">
               {bookingSourceLabel(booking.source)}
             </span>
 
@@ -67,12 +67,12 @@ export function BookingList({
             {href ? (
               <a
                 href={href(booking)}
-                className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 sm:gap-4"
+                className="flex min-h-12 w-full items-center gap-3 px-4 transition-colors duration-[120ms] hover:bg-n-100 sm:min-h-11 sm:gap-4"
               >
                 {body}
               </a>
             ) : (
-              <div className="flex items-center gap-3 px-4 py-3 sm:gap-4">{body}</div>
+              <div className="flex min-h-12 items-center gap-3 px-4 sm:min-h-11 sm:gap-4">{body}</div>
             )}
           </li>
         )

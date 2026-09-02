@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 export function AuthCard({
@@ -14,15 +15,15 @@ export function AuthCard({
   className?: string
 }) {
   return (
-    <div className={cn('space-y-4', className)}>
-      <div className="rounded-2xl border bg-card p-6 shadow-sm sm:p-7">
+    <div className={cn('w-full max-w-[400px] space-y-4', className)}>
+      <Card className="p-8">
         <div className="space-y-1.5">
-          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-          {description ? <p className="text-sm text-muted-foreground text-pretty">{description}</p> : null}
+          <h1 className="text-xl leading-tight tracking-[-0.015em] font-semibold text-ink">{title}</h1>
+          {description ? <p className="text-[0.9375rem] text-ink-3 text-pretty">{description}</p> : null}
         </div>
         <div className="mt-6">{children}</div>
-      </div>
-      {footer ? <div className="text-center text-sm text-muted-foreground">{footer}</div> : null}
+      </Card>
+      {footer ? <div className="text-center text-[0.9375rem] text-ink-3">{footer}</div> : null}
     </div>
   )
 }
