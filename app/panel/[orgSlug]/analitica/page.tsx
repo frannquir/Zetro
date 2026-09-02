@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: 'Analítica — Zetro' }
 
 export default async function AnaliticaPage({ params }: PageProps<'/panel/[orgSlug]/analitica'>) {
   const { orgSlug } = await params
-  const { org } = await getMembership(orgSlug)
+  await getMembership(orgSlug)
   const analytics = await getAnalytics(orgSlug, 30)
 
   const chart = analytics.daily.map((row) => ({ label: row.day.slice(8, 10), value: row.pageviews }))
