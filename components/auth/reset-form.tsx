@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FormMessage } from '@/components/auth/form-message'
 import { SubmitButton } from '@/components/auth/submit-button'
-import { emptyState, requestPasswordReset, setPassword } from '@/lib/auth/actions'
+import { requestPasswordReset, setPassword } from '@/lib/auth/actions'
+import { emptyState } from '@/lib/auth/form-state'
 
 export function ResetForm({ mode }: { mode: 'request' | 'set' }) {
   const [state, action] = useActionState(mode === 'set' ? setPassword : requestPasswordReset, emptyState)
