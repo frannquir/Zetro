@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { ArrowRight } from 'lucide-react'
+import { VerticalIllustration } from '@/components/marketing/vertical-illustration'
 import { works } from '@/content/works'
 import { verticalLabel } from '@/lib/labels'
 
@@ -30,9 +31,7 @@ export default function TrabajosPage() {
             className="group flex flex-col overflow-hidden rounded-md border border-n-200 bg-surface"
           >
             <div className="flex aspect-[4/3] w-full items-center justify-center bg-paper-2 px-4">
-              <span className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-ink-3 text-center">
-                {work.name}
-              </span>
+              <VerticalIllustration vertical={work.vertical} />
             </div>
             <div className="flex flex-1 flex-col gap-2 p-5">
               <div className="flex items-center gap-2 text-xs text-ink-4">

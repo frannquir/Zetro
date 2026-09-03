@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { VerticalIllustration } from '@/components/marketing/vertical-illustration'
 import { works, workBySlug } from '@/content/works'
 import { verticalLabel } from '@/lib/labels'
 
@@ -50,8 +51,8 @@ export default async function TrabajoPage({ params }: PageProps<'/trabajos/[slug
         </div>
       </header>
 
-      <div className="flex aspect-[16/6] w-full items-center justify-center bg-paper-2" aria-hidden="true">
-        <span className="text-[2.75rem] leading-[1.08] tracking-[-0.025em] font-semibold text-ink-3">{work.name}</span>
+      <div className="flex aspect-[16/6] w-full items-center justify-center bg-paper-2">
+        <VerticalIllustration vertical={work.vertical} className="[&_svg]:size-24" />
       </div>
 
       <div className="mx-auto w-full max-w-[45rem] space-y-12 px-5 py-14 sm:px-8">

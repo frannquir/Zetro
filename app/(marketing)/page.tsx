@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PanelPreview } from '@/components/marketing/panel-preview'
+import { VerticalIllustration } from '@/components/marketing/vertical-illustration'
+import { ChecklistDoodle, PathDoodle } from '@/components/marketing/notebook-doodle'
 import { works } from '@/content/works'
 import { verticalLabel } from '@/lib/labels'
 
@@ -13,49 +15,19 @@ export const metadata: Metadata = {
 }
 
 const features = [
-  {
-    title: 'Un sitio que carga rápido',
-    body: 'Next.js, hosting incluido y tu dominio. Nada de plantillas pesadas ni plugins que se rompen solos.',
-  },
-  {
-    title: 'Reservas que no se pisan',
-    body: 'El cliente reserva desde tu sitio y entra directo a tu agenda. Dos personas no pueden tomar la misma mesa.',
-  },
-  {
-    title: 'Números que sirven',
-    body: 'Cuánta gente entró, de dónde vino y cuántos terminaron reservando. En la misma pantalla.',
-  },
-  {
-    title: 'Se maneja del celular',
-    body: 'El panel está pensado para usarse parado detrás de la barra, no sentado en una oficina.',
-  },
-  {
-    title: 'Tu contenido, sin depender de nosotros',
-    body: 'Cambiás la carta, los horarios o los precios desde el panel y el sitio se actualiza al toque.',
-  },
-  {
-    title: 'Listo en dos semanas',
-    body: 'Charla, propuesta, sitio en línea. Sin reuniones de descubrimiento de tres meses.',
-  },
+  { title: 'Un sitio que carga rápido', body: 'Hosting y dominio incluidos, sin plugins que se rompen solos.' },
+  { title: 'Reservas que no se pisan', body: 'Entran directo a tu agenda. Nunca dos personas, la misma mesa.' },
+  { title: 'Números que sirven', body: 'Quién entró, de dónde vino y cuántos reservaron. Una sola pantalla.' },
+  { title: 'Se maneja del celular', body: 'Pensado para usarse parado atrás de la barra, no en una oficina.' },
+  { title: 'Tu contenido, sin depender de nosotros', body: 'Cambiás carta y precios desde el panel, al toque.' },
+  { title: 'Listo en dos semanas', body: 'Charla, propuesta, sitio en línea. Sin vueltas de por medio.' },
 ]
 
 const steps = [
-  {
-    title: 'Charlamos media hora',
-    body: 'Nos contás qué hace tu negocio y qué te está costando. Salimos con un alcance y un precio cerrado.',
-  },
-  {
-    title: 'Armamos el sitio',
-    body: 'Diseño y contenido. Vos revisás una versión en línea antes de que la vea nadie más.',
-  },
-  {
-    title: 'Conectamos el panel',
-    body: 'Cargamos tus mesas, servicios y horarios. Te mostramos cómo se usa en una llamada de veinte minutos.',
-  },
-  {
-    title: 'Salimos a producción',
-    body: 'Tu dominio, tu sitio, tus reservas. A partir de ahí lo mantenemos andando.',
-  },
+  { title: 'Charlamos media hora', body: 'Nos contás tu negocio. Salimos con alcance y precio cerrado.' },
+  { title: 'Armamos el sitio', body: 'Revisás una versión en línea antes de que la vea nadie más.' },
+  { title: 'Conectamos el panel', body: 'Cargamos mesas y horarios. Te mostramos cómo se usa en 20 minutos.' },
+  { title: 'Salimos a producción', body: 'Tu dominio, tu sitio, tus reservas. Lo mantenemos andando.' },
 ]
 
 const plans = [
@@ -178,23 +150,24 @@ export default function LandingPage() {
           <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
             Un sitio no alcanza si después seguís anotando en un cuaderno.
           </h2>
-          <p className="text-[1.0625rem] leading-[1.55] text-ink-2 text-pretty">
-            Por eso todo lo que hacemos viene con un panel atrás. El sitio muestra; el panel resuelve.
-          </p>
         </div>
 
-        <div className="mt-10 grid gap-x-8 gap-y-8 md:grid-cols-2">
-          {features.map((feature, index) => (
-            <div key={feature.title} className="grid grid-cols-[2rem_1fr] gap-x-3">
-              <span className="pt-0.5 text-[0.8125rem] font-medium tnum text-ink-4">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <div>
-                <h3 className="font-medium text-ink">{feature.title}</h3>
-                <p className="mt-1.5 text-[0.9375rem] leading-[1.55] text-ink-2 text-pretty">{feature.body}</p>
+        <div className="mt-10 grid gap-10 lg:grid-cols-[18rem_1fr] lg:items-center">
+          <ChecklistDoodle className="mx-auto hidden w-44 text-n-300 lg:block" />
+
+          <div className="grid gap-x-8 gap-y-8 sm:grid-cols-2">
+            {features.map((feature, index) => (
+              <div key={feature.title} className="grid grid-cols-[2rem_1fr] gap-x-3">
+                <span className="pt-0.5 text-[0.8125rem] font-medium tnum text-ink-4">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <h3 className="font-medium text-ink">{feature.title}</h3>
+                  <p className="mt-1.5 text-[0.9375rem] leading-[1.55] text-ink-2 text-pretty">{feature.body}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
@@ -207,7 +180,9 @@ export default function LandingPage() {
             </h2>
           </div>
 
-          <ol className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <PathDoodle className="mt-10 mb-2 hidden w-full lg:block" />
+
+          <ol className="mt-10 grid gap-6 sm:grid-cols-2 lg:mt-0 lg:grid-cols-4">
             {steps.map((step, index) => (
               <li key={step.title} className="space-y-2 border-t border-n-300 pt-5">
                 <span className="text-[1.75rem] leading-none tracking-[-0.02em] font-semibold tnum text-ink">
@@ -244,9 +219,7 @@ export default function LandingPage() {
               className="group flex flex-col overflow-hidden rounded-md border border-n-200 bg-surface"
             >
               <div className="flex aspect-[4/3] w-full items-center justify-center bg-paper-2 px-4">
-                <span className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-ink-3 text-center">
-                  {work.name}
-                </span>
+                <VerticalIllustration vertical={work.vertical} />
               </div>
               <div className="flex-1 space-y-2 p-5">
                 <div className="flex items-center gap-2 text-xs text-ink-4">
