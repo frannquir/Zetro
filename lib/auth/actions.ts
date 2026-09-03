@@ -3,11 +3,7 @@
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
-
-export type FormState = { error: string | null; notice: string | null }
-
-export const emptyState: FormState = { error: null, notice: null }
-
+import type { FormState } from './form-state'
 const credentials = z.object({
   email: z.email('Revisá el mail'),
   password: z.string().min(1, 'Escribí tu contraseña'),

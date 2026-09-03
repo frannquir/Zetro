@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { FormMessage } from '@/components/auth/form-message'
 import { SubmitButton } from '@/components/auth/submit-button'
-import { emptyState, sendMagicLink, signIn } from '@/lib/auth/actions'
+import { sendMagicLink, signIn } from '@/lib/auth/actions'
+import { emptyState } from '@/lib/auth/form-state'
 
 export function LoginForm({ next }: { next: string }) {
   const [mode, setMode] = useState<'password' | 'link'>('password')
