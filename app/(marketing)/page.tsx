@@ -4,7 +4,6 @@ import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PanelPreview } from '@/components/marketing/panel-preview'
 import { VerticalIllustration } from '@/components/marketing/vertical-illustration'
-import { PathDoodle } from '@/components/marketing/notebook-doodle'
 import { DiagnosticForm } from '@/components/marketing/diagnostic-form'
 import { FeaturesBento } from '@/components/marketing/features-bento'
 import { HowItWorks } from '@/components/marketing/how-it-works'
@@ -139,9 +138,7 @@ export default function LandingPage() {
             </h2>
           </div>
 
-          <PathDoodle className="mt-10 mb-2 hidden w-full lg:block" />
-
-          <div className="mt-10 lg:mt-6">
+          <div className="mt-10">
             <HowItWorks />
           </div>
         </div>
