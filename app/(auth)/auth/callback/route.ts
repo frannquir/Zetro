@@ -7,6 +7,14 @@ export async function GET(request: NextRequest) {
   const raw = searchParams.get('next') ?? '/panel'
   const next = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/panel'
 
+  const denied = searchParams.get('error')
+  if (denied) {
+    const detail = `${searchParams.get('error_code') ?? ''} ${searchParams.get('error_description') ?? ''}`
+    // signup is closed, so an unknown google account lands here instead of getting an account
+    const unknown = /signup_disabled|signups not allowed/i.test(detail)
+    return NextResponse.redirect(`${origin}/login?error=${unknown ? 'sin_cuenta' : 'google'}`)
+  }
+
   if (!code) return NextResponse.redirect(`${origin}/login?error=link`)
 
   const supabase = await createClient()

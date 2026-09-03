@@ -53,6 +53,22 @@ export async function sendMagicLink(_state: FormState, formData: FormData): Prom
   return { error: null, notice: 'Te mandamos un enlace para entrar. Revisá tu correo.' }
 }
 
+export async function signInWithGoogle(_state: FormState, formData: FormData): Promise<FormState> {
+  const next = safeNext(formData.get('next'))
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/auth/callback?next=${encodeURIComponent(next)}`,
+      queryParams: { prompt: 'select_account' },
+    },
+  })
+
+  if (error || !data.url) return { error: 'No pudimos abrir Google. Entrá con tu contraseña.', notice: null }
+
+  redirect(data.url)
+}
+
 export async function requestPasswordReset(_state: FormState, formData: FormData): Promise<FormState> {
   const parsed = z.email('Revisá el mail').safeParse(formData.get('email'))
   if (!parsed.success) return { error: 'Revisá el mail', notice: null }
