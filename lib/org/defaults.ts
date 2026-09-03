@@ -7,10 +7,21 @@ export type OrgSettings = {
     require_phone: boolean
     max_party_size: number
   }
-  modules: { menu: boolean; events: boolean; classes: boolean }
-  public_widget: { primary_color: string; show_prices: boolean }
+  modules: {
+    menu: boolean
+    events: boolean
+    classes: boolean
+  }
+  public_widget: {
+    primary_color: string
+    show_prices: boolean
+  }
 }
 
+export const defaultTimezone = 'America/Argentina/Buenos_Aires'
+export const defaultCurrency = 'ARS'
+
+// mirrors private.default_org_settings()
 export const defaultSettings: OrgSettings = {
   booking: {
     slot_minutes: 30,
@@ -20,28 +31,27 @@ export const defaultSettings: OrgSettings = {
     require_phone: true,
     max_party_size: 12,
   },
-  modules: { menu: true, events: true, classes: false },
-  public_widget: { primary_color: '#111111', show_prices: true },
+  modules: {
+    menu: true,
+    events: true,
+    classes: false,
+  },
+  public_widget: {
+    primary_color: '#111111',
+    show_prices: true,
+  },
 }
 
-export const defaultTimezone = 'America/Argentina/Buenos_Aires'
-export const defaultCurrency = 'ARS'
-
-function section<T extends object>(base: T, raw: unknown): T {
-  if (!raw || typeof raw !== 'object') return { ...base }
-  const value = raw as Record<string, unknown>
-  const merged = { ...base } as Record<string, unknown>
-  for (const key of Object.keys(base)) {
-    if (value[key] !== undefined && value[key] !== null) merged[key] = value[key]
-  }
-  return merged as T
+function group<K extends keyof OrgSettings>(settings: unknown, key: K): OrgSettings[K] {
+  const value = settings && typeof settings === 'object' ? (settings as Record<string, unknown>)[key] : null
+  if (!value || typeof value !== 'object') return defaultSettings[key]
+  return { ...defaultSettings[key], ...(value as object) } as OrgSettings[K]
 }
 
-export function readSettings(raw: unknown): OrgSettings {
-  const value = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
+export function readSettings(settings: unknown): OrgSettings {
   return {
-    booking: section(defaultSettings.booking, value.booking),
-    modules: section(defaultSettings.modules, value.modules),
-    public_widget: section(defaultSettings.public_widget, value.public_widget),
+    booking: group(settings, 'booking'),
+    modules: group(settings, 'modules'),
+    public_widget: group(settings, 'public_widget'),
   }
 }
