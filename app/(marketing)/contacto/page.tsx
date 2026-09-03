@@ -8,8 +8,8 @@ export const metadata: Metadata = {
 }
 
 const channels = [
-  { icon: Mail, label: 'hola@zetro.com', hint: 'Respondemos en el día hábil' },
-  { icon: MessageCircle, label: 'WhatsApp 11 5555 5555', hint: 'Lunes a viernes, 9 a 19' },
+  { icon: Mail, label: 'contacto@zetro.app', hint: 'Respondemos en el día hábil' },
+  { icon: MessageCircle, label: 'WhatsApp [[PENDIENTE: WHATSAPP]]', hint: 'Lunes a viernes, 9 a 19' },
   { icon: Clock, label: 'Primera charla: 30 minutos', hint: 'Sin costo y sin compromiso' },
 ]
 

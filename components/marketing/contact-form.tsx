@@ -64,7 +64,7 @@ export function ContactForm() {
       <Alert className="border-l-ok">
         <CircleCheckBig className="text-ok" />
         <AlertTitle>Nos llegó</AlertTitle>
-        <AlertDescription>Te respondemos en el día hábil. Si es urgente, escribinos a hola@zetro.com.</AlertDescription>
+        <AlertDescription>Te respondemos en el día hábil. Si es urgente, escribinos a contacto@zetro.app.</AlertDescription>
       </Alert>
     )
   }
