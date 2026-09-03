@@ -3,7 +3,8 @@
 import { useActionState } from 'react'
 import { FormMessage } from '@/components/auth/form-message'
 import { SubmitButton } from '@/components/auth/submit-button'
-import { emptyState, signInWithGoogle } from '@/lib/auth/actions'
+import { signInWithGoogle } from '@/lib/auth/actions'
+import { emptyState } from '@/lib/auth/form-state'
 
 function GoogleMark() {
   return (
