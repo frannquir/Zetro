@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation'
 import { getViewer } from '@/lib/data'
 import { adminNav } from '@/lib/nav'
 import { AdminNav } from '@/components/admin/admin-nav'
@@ -6,6 +7,7 @@ import { Logo } from '@/components/marketing/logo'
 
 export default async function AdminLayout({ children }: LayoutProps<'/admin'>) {
   const viewer = await getViewer()
+  if (!viewer.isPlatformAdmin) notFound()
 
   return (
     <div className="flex min-h-dvh bg-paper">

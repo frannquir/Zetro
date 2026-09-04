@@ -1,18 +1,91 @@
-import { notFound } from 'next/navigation'
+import { cache } from 'react'
+import { notFound, redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { readSettings } from '@/lib/org/defaults'
 import * as demo from './demo'
 import type { Booking, Membership, Org, Viewer } from './types'
 
 export * from './types'
 
-export async function getViewer(): Promise<Viewer> {
-  return demo.demoViewer
+type OrgRow = {
+  id: string
+  name: string
+  slug: string
+  vertical: string
+  status: string
+  timezone: string
+  currency: string
+  logo_url: string | null
+  phone: string | null
+  address: string | null
+  whatsapp: string | null
+  settings: unknown
 }
+
+function toOrg(row: OrgRow): Org {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    vertical: row.vertical,
+    status: row.status,
+    timeZone: row.timezone,
+    currency: row.currency,
+    logoUrl: row.logo_url,
+    phone: row.phone,
+    address: row.address,
+    whatsapp: row.whatsapp,
+    settings: readSettings(row.settings),
+  }
+}
+
+export const getViewer = cache(async (): Promise<Viewer> => {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const [profile, memberships] = await Promise.all([
+    supabase.from('profiles').select('full_name, is_platform_admin').eq('id', user.id).maybeSingle(),
+    supabase
+      .from('memberships')
+      .select(
+        'role, orgs(id, name, slug, vertical, status, timezone, currency, logo_url, phone, address, whatsapp, settings)',
+      )
+      .eq('user_id', user.id),
+  ])
+
+  const rows = (memberships.data ?? []) as { role: string; orgs: OrgRow | null }[]
+
+  return {
+    id: user.id,
+    email: user.email ?? '',
+    fullName: profile.data?.full_name ?? user.email ?? '',
+    isPlatformAdmin: profile.data?.is_platform_admin ?? false,
+    memberships: rows
+      .flatMap((row) => (row.orgs ? [{ org: toOrg(row.orgs), role: row.role }] : []))
+      .sort((a, b) => a.org.name.localeCompare(b.org.name)),
+  }
+})
 
 export async function getMembership(orgSlug: string): Promise<Membership> {
   const viewer = await getViewer()
   const membership = viewer.memberships.find((item) => item.org.slug === orgSlug)
-  if (!membership) notFound()
-  return membership
+  if (membership) return membership
+
+  // platform admins hold no membership row, rls lets them read the org anyway
+  if (!viewer.isPlatformAdmin) notFound()
+
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('orgs')
+    .select('id, name, slug, vertical, status, timezone, currency, logo_url, phone, address, whatsapp, settings')
+    .eq('slug', orgSlug)
+    .maybeSingle()
+  if (!data) notFound()
+
+  return { org: toOrg(data), role: 'owner' }
 }
 
 export async function getOrg(orgSlug: string): Promise<Org> {

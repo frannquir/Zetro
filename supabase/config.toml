@@ -17,7 +17,7 @@ enabled = true
 
 [db.seed]
 enabled = true
-sql_paths = ["./seed.sql"]
+sql_paths = ["./seed.sql", "./seed.local*.sql"]
 
 [realtime]
 enabled = false
@@ -48,7 +48,7 @@ enable_manual_linking = false
 minimum_password_length = 8
 
 [auth.email]
-enable_signup = false
+enable_signup = true
 double_confirm_changes = true
 enable_confirmations = false
 max_frequency = "1s"

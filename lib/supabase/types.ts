@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -39,6 +34,312 @@ export type Database = {
   }
   public: {
     Tables: {
+      availability_exceptions: {
+        Row: {
+          closes_at: string | null
+          created_at: string
+          date: string
+          id: string
+          is_closed: boolean
+          note: string | null
+          opens_at: string | null
+          org_id: string
+          resource_id: string | null
+        }
+        Insert: {
+          closes_at?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          is_closed?: boolean
+          note?: string | null
+          opens_at?: string | null
+          org_id: string
+          resource_id?: string | null
+        }
+        Update: {
+          closes_at?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          is_closed?: boolean
+          note?: string | null
+          opens_at?: string | null
+          org_id?: string
+          resource_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_exceptions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "availability_exceptions_org_id_resource_id_fkey"
+            columns: ["org_id", "resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["org_id", "id"]
+          },
+        ]
+      }
+      availability_rules: {
+        Row: {
+          closes_at: string
+          created_at: string
+          id: string
+          opens_at: string
+          org_id: string
+          resource_id: string | null
+          weekday: number
+        }
+        Insert: {
+          closes_at: string
+          created_at?: string
+          id?: string
+          opens_at: string
+          org_id: string
+          resource_id?: string | null
+          weekday: number
+        }
+        Update: {
+          closes_at?: string
+          created_at?: string
+          id?: string
+          opens_at?: string
+          org_id?: string
+          resource_id?: string | null
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_rules_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "availability_rules_org_id_resource_id_fkey"
+            columns: ["org_id", "resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["org_id", "id"]
+          },
+        ]
+      }
+      booking_events: {
+        Row: {
+          actor_id: string | null
+          at: string
+          booking_id: string
+          from_status: Database["public"]["Enums"]["booking_status"] | null
+          id: string
+          meta: Json
+          org_id: string
+          to_status: Database["public"]["Enums"]["booking_status"]
+        }
+        Insert: {
+          actor_id?: string | null
+          at?: string
+          booking_id: string
+          from_status?: Database["public"]["Enums"]["booking_status"] | null
+          id?: string
+          meta?: Json
+          org_id: string
+          to_status: Database["public"]["Enums"]["booking_status"]
+        }
+        Update: {
+          actor_id?: string | null
+          at?: string
+          booking_id?: string
+          from_status?: Database["public"]["Enums"]["booking_status"] | null
+          id?: string
+          meta?: Json
+          org_id?: string
+          to_status?: Database["public"]["Enums"]["booking_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_events_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          blocked_range: unknown
+          buffer_after_minutes: number
+          buffer_before_minutes: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          ends_at: string
+          google_event_id: string | null
+          id: string
+          internal_notes: string | null
+          notes: string | null
+          org_id: string
+          party_size: number
+          resource_id: string
+          service_id: string | null
+          source: Database["public"]["Enums"]["booking_source"]
+          starts_at: string
+          status: Database["public"]["Enums"]["booking_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          blocked_range: unknown
+          buffer_after_minutes?: number
+          buffer_before_minutes?: number
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          ends_at: string
+          google_event_id?: string | null
+          id?: string
+          internal_notes?: string | null
+          notes?: string | null
+          org_id: string
+          party_size?: number
+          resource_id: string
+          service_id?: string | null
+          source?: Database["public"]["Enums"]["booking_source"]
+          starts_at: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          blocked_range?: unknown
+          buffer_after_minutes?: number
+          buffer_before_minutes?: number
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          ends_at?: string
+          google_event_id?: string | null
+          id?: string
+          internal_notes?: string | null
+          notes?: string | null
+          org_id?: string
+          party_size?: number
+          resource_id?: string
+          service_id?: string | null
+          source?: Database["public"]["Enums"]["booking_source"]
+          starts_at?: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_org_id_customer_id_fkey"
+            columns: ["org_id", "customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["org_id", "id"]
+          },
+          {
+            foreignKeyName: "bookings_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_org_id_resource_id_fkey"
+            columns: ["org_id", "resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["org_id", "id"]
+          },
+          {
+            foreignKeyName: "bookings_org_id_service_id_fkey"
+            columns: ["org_id", "service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["org_id", "id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          last_visit_at: string | null
+          marketing_opt_in: boolean
+          notes: string | null
+          org_id: string
+          phone: string | null
+          visits_count: number
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          last_visit_at?: string | null
+          marketing_opt_in?: boolean
+          notes?: string | null
+          org_id: string
+          phone?: string | null
+          visits_count?: number
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          last_visit_at?: string | null
+          marketing_opt_in?: boolean
+          notes?: string | null
+          org_id?: string
+          phone?: string | null
+          visits_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invites: {
         Row: {
           accepted_at: string | null
@@ -207,6 +508,165 @@ export type Database = {
         }
         Relationships: []
       }
+      resources: {
+        Row: {
+          archived_at: string | null
+          capacity: number
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["resource_kind"]
+          metadata: Json
+          name: string
+          org_id: string
+          sort_order: number
+          user_id: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          capacity?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind: Database["public"]["Enums"]["resource_kind"]
+          metadata?: Json
+          name: string
+          org_id: string
+          sort_order?: number
+          user_id?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          capacity?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["resource_kind"]
+          metadata?: Json
+          name?: string
+          org_id?: string
+          sort_order?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_resources: {
+        Row: {
+          created_at: string
+          org_id: string
+          resource_id: string
+          service_id: string
+        }
+        Insert: {
+          created_at?: string
+          org_id: string
+          resource_id: string
+          service_id: string
+        }
+        Update: {
+          created_at?: string
+          org_id?: string
+          resource_id?: string
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_resources_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_resources_org_id_resource_id_fkey"
+            columns: ["org_id", "resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["org_id", "id"]
+          },
+          {
+            foreignKeyName: "service_resources_org_id_service_id_fkey"
+            columns: ["org_id", "service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["org_id", "id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          archived_at: string | null
+          buffer_after_minutes: number
+          buffer_before_minutes: number
+          created_at: string
+          currency: string | null
+          description: string | null
+          duration_minutes: number
+          id: string
+          is_active: boolean
+          is_public: boolean
+          name: string
+          org_id: string
+          price_cents: number | null
+          sort_order: number
+        }
+        Insert: {
+          archived_at?: string | null
+          buffer_after_minutes?: number
+          buffer_before_minutes?: number
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          duration_minutes: number
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          name: string
+          org_id: string
+          price_cents?: number | null
+          sort_order?: number
+        }
+        Update: {
+          archived_at?: string | null
+          buffer_after_minutes?: number
+          buffer_before_minutes?: number
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          name?: string
+          org_id?: string
+          price_cents?: number | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sites: {
         Row: {
           created_at: string
@@ -278,6 +738,46 @@ export type Database = {
         }
         Returns: Json
       }
+      create_booking: {
+        Args: {
+          p_customer?: Json
+          p_notes?: string
+          p_org: string
+          p_party_size?: number
+          p_resource: string
+          p_service: string
+          p_starts_at: string
+        }
+        Returns: {
+          blocked_range: unknown
+          buffer_after_minutes: number
+          buffer_before_minutes: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          ends_at: string
+          google_event_id: string | null
+          id: string
+          internal_notes: string | null
+          notes: string | null
+          org_id: string
+          party_size: number
+          resource_id: string
+          service_id: string | null
+          source: Database["public"]["Enums"]["booking_source"]
+          starts_at: string
+          status: Database["public"]["Enums"]["booking_status"]
+          updated_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "bookings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_invite: {
         Args: {
           p_email: string
@@ -285,6 +785,89 @@ export type Database = {
           p_role: Database["public"]["Enums"]["member_role"]
         }
         Returns: Json
+      }
+      get_availability: {
+        Args: {
+          p_from: string
+          p_org: string
+          p_party_size?: number
+          p_service: string
+          p_to: string
+        }
+        Returns: {
+          ends_at: string
+          resource_id: string
+          resource_name: string
+          starts_at: string
+        }[]
+      }
+      reschedule_booking: {
+        Args: { p_booking: string; p_resource?: string; p_starts_at: string }
+        Returns: {
+          blocked_range: unknown
+          buffer_after_minutes: number
+          buffer_before_minutes: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          ends_at: string
+          google_event_id: string | null
+          id: string
+          internal_notes: string | null
+          notes: string | null
+          org_id: string
+          party_size: number
+          resource_id: string
+          service_id: string | null
+          source: Database["public"]["Enums"]["booking_source"]
+          starts_at: string
+          status: Database["public"]["Enums"]["booking_status"]
+          updated_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "bookings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      set_booking_status: {
+        Args: {
+          p_booking: string
+          p_reason?: string
+          p_status: Database["public"]["Enums"]["booking_status"]
+        }
+        Returns: {
+          blocked_range: unknown
+          buffer_after_minutes: number
+          buffer_before_minutes: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          ends_at: string
+          google_event_id: string | null
+          id: string
+          internal_notes: string | null
+          notes: string | null
+          org_id: string
+          party_size: number
+          resource_id: string
+          service_id: string | null
+          source: Database["public"]["Enums"]["booking_source"]
+          starts_at: string
+          status: Database["public"]["Enums"]["booking_status"]
+          updated_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "bookings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
@@ -323,12 +906,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -352,11 +935,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -377,11 +960,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -402,11 +985,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -419,11 +1002,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -456,3 +1039,4 @@ export const Constants = {
     },
   },
 } as const
+
