@@ -14,7 +14,7 @@ export function PanelPreview({ className }: { className?: string }) {
   return (
     <div className={cn('overflow-hidden rounded-none border border-n-300 bg-surface', className)} aria-hidden="true">
       <div className="flex h-8 items-center border-b border-n-200 bg-paper-2 px-4">
-        <span className="truncate font-mono text-[0.6875rem] text-ink-4">app.zetro.com/panel/bar-chelo</span>
+        <span className="truncate font-mono text-[0.6875rem] text-ink-4">app.zetro.app/panel/bar-chelo</span>
       </div>
 
       <div className="flex">

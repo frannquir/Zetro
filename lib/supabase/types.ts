@@ -391,6 +391,63 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          meta: Json
+          name: string
+          org_id: string | null
+          phone: string | null
+          site_id: string | null
+          source_path: string | null
+          status: Database["public"]["Enums"]["lead_status"]
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          meta?: Json
+          name: string
+          org_id?: string | null
+          phone?: string | null
+          site_id?: string | null
+          source_path?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          meta?: Json
+          name?: string
+          org_id?: string | null
+          phone?: string | null
+          site_id?: string | null
+          source_path?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memberships: {
         Row: {
           created_at: string
@@ -737,6 +794,10 @@ export type Database = {
           p_vertical: Database["public"]["Enums"]["vertical_type"]
         }
         Returns: Json
+      }
+      check_rate_limit: {
+        Args: { p_bucket: string; p_limit: number; p_window_seconds: number }
+        Returns: boolean
       }
       create_booking: {
         Args: {

@@ -1,11 +1,24 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Check, Minus, Plus } from 'lucide-react'
+import { Check, CircleCheckBig, Loader2, Minus, Plus } from 'lucide-react'
+import { z } from 'zod'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { postJson } from '@/lib/api'
 
-const CONTACT_EMAIL = 'contacto@zetro.app'
+const contactSchema = z.object({
+  name: z.string().trim().min(2, 'Poné tu nombre'),
+  email: z.email('Revisá el mail'),
+  phone: z.string().trim().max(40).optional(),
+  message: z.string().trim().max(2000).optional(),
+})
+
+type ContactErrors = Partial<Record<keyof z.infer<typeof contactSchema>, string>>
 // [[PENDIENTE: WHATSAPP]] — número de WhatsApp comercial en formato internacional sin signos (ej. 5492235551234)
 const WHATSAPP_NUMBER: string | null = null
 
@@ -130,6 +143,11 @@ function sumRange(ranges: Money[]): Money {
 
 export function PricingBuilder() {
   const [selection, setSelection] = useState<Selection>(loadSelection)
+  const [pending, setPending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [errors, setErrors] = useState<ContactErrors>({})
+  const [failure, setFailure] = useState<string | null>(null)
+  const formId = useId()
 
   useEffect(() => {
     saveSelection(selection)
@@ -186,7 +204,6 @@ export function PricingBuilder() {
     return a.cantidad ? `${a.nombre} ×${qty}` : a.nombre
   })
 
-  const budgetSubject = `Presupuesto - consulta`
   const budgetBody = [
     'Quiero pedir el presupuesto exacto para mi negocio.',
     '',
@@ -199,10 +216,58 @@ export function PricingBuilder() {
     .filter(Boolean)
     .join('\n')
 
-  const mailtoHref = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(budgetSubject)}&body=${encodeURIComponent(budgetBody)}`
   const whatsappHref = WHATSAPP_NUMBER
     ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(budgetBody)}`
     : null
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setFailure(null)
+
+    const form = new FormData(event.currentTarget)
+
+    if (form.get('company_website')) {
+      setSent(true)
+      return
+    }
+
+    const parsed = contactSchema.safeParse({
+      name: form.get('name'),
+      email: form.get('email'),
+      phone: form.get('phone') || undefined,
+      message: form.get('message') || undefined,
+    })
+
+    if (!parsed.success) {
+      const next: ContactErrors = {}
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0] as keyof ContactErrors
+        if (!next[key]) next[key] = issue.message
+      }
+      setErrors(next)
+      return
+    }
+
+    setErrors({})
+    setPending(true)
+
+    const result = await postJson<{ ok: true }>('/api/public/leads', {
+      name: parsed.data.name,
+      email: parsed.data.email,
+      phone: parsed.data.phone,
+      message: parsed.data.message ? `${budgetBody}\n\n${parsed.data.message}` : budgetBody,
+      source_path: window.location.pathname,
+      meta: {
+        selection: summaryLines,
+        once: formatRange(totalOnce),
+        monthly: mantenimientoActivo ? formatRange(totalMonthly) : null,
+      },
+    })
+
+    setPending(false)
+    if (result.ok) setSent(true)
+    else setFailure(result.error.message)
+  }
 
   return (
     <div className="space-y-8">
@@ -337,19 +402,85 @@ export function PricingBuilder() {
             )}
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {whatsappHref ? (
-              <Button asChild variant="outline" size="lg">
-                <a href={whatsappHref} target="_blank" rel="noreferrer">
-                  Por WhatsApp
-                </a>
-              </Button>
-            ) : null}
-            <Button asChild size="lg">
-              <a href={mailtoHref}>Pedir presupuesto exacto</a>
-            </Button>
-          </div>
         </div>
+
+        {sent ? (
+          <Alert className="mt-6 border-l-ok">
+            <CircleCheckBig className="text-ok" />
+            <AlertTitle>Nos llegó tu pedido</AlertTitle>
+            <AlertDescription>
+              Te mandamos una copia por mail y te respondemos en el día hábil.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <form onSubmit={onSubmit} noValidate className="mt-6 space-y-4 border-t border-n-200 pt-6">
+            <p className="text-[0.9375rem] text-ink-2">
+              Dejanos tus datos y te mandamos el presupuesto exacto con esta configuración.
+            </p>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <ContactField id={`${formId}-name`} label="Nombre" error={errors.name}>
+                <Input
+                  id={`${formId}-name`}
+                  name="name"
+                  autoComplete="name"
+                  placeholder="Camila Duarte"
+                  aria-invalid={!!errors.name}
+                />
+              </ContactField>
+              <ContactField id={`${formId}-email`} label="Email" error={errors.email}>
+                <Input
+                  id={`${formId}-email`}
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="camila@barchelo.com.ar"
+                  aria-invalid={!!errors.email}
+                />
+              </ContactField>
+              <ContactField id={`${formId}-phone`} label="WhatsApp (opcional)" error={errors.phone}>
+                <Input
+                  id={`${formId}-phone`}
+                  name="phone"
+                  autoComplete="tel"
+                  placeholder="11 5566 7788"
+                  aria-invalid={!!errors.phone}
+                />
+              </ContactField>
+            </div>
+
+            <ContactField id={`${formId}-message`} label="Algo que quieras contarnos (opcional)" error={errors.message}>
+              <Textarea
+                id={`${formId}-message`}
+                name="message"
+                rows={3}
+                placeholder="Tenemos dos locales y queremos reservas en los dos."
+              />
+            </ContactField>
+
+            <div className="absolute h-px w-px overflow-hidden" style={{ clip: 'rect(0,0,0,0)' }} aria-hidden="true">
+              <label htmlFor={`${formId}-company_website`}>No completar este campo</label>
+              <input id={`${formId}-company_website`} name="company_website" type="text" tabIndex={-1} autoComplete="off" />
+            </div>
+
+            {failure ? <p className="text-[0.9375rem] text-err">{failure}</p> : null}
+
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" size="lg" disabled={pending}>
+                {pending ? <Loader2 className="animate-spin" /> : null}
+                Pedir presupuesto exacto
+              </Button>
+              {whatsappHref ? (
+                <Button asChild variant="outline" size="lg">
+                  <a href={whatsappHref} target="_blank" rel="noreferrer">
+                    Por WhatsApp
+                  </a>
+                </Button>
+              ) : null}
+            </div>
+          </form>
+        )}
+
         <p className="mt-3 text-xs text-ink-4">
           Es una estimación para que te hagas una idea. Cada proyecto es distinto: el precio final sale después de
           entender qué necesitás.
@@ -371,6 +502,26 @@ export function PricingBuilder() {
           <Link href="/contacto">Hablemos de tu proyecto</Link>
         </Button>
       </div>
+    </div>
+  )
+}
+
+function ContactField({
+  id,
+  label,
+  error,
+  children,
+}: {
+  id: string
+  label: string
+  error?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      {children}
+      {error ? <p className="text-xs text-err">{error}</p> : null}
     </div>
   )
 }

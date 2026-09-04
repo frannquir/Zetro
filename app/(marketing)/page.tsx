@@ -4,7 +4,6 @@ import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PanelPreview } from '@/components/marketing/panel-preview'
 import { VerticalIllustration } from '@/components/marketing/vertical-illustration'
-import { DiagnosticForm } from '@/components/marketing/diagnostic-form'
 import { FeaturesBento } from '@/components/marketing/features-bento'
 import { HowItWorks } from '@/components/marketing/how-it-works'
 import { PricingBuilder } from '@/components/marketing/pricing-builder'
@@ -89,31 +88,6 @@ export default function LandingPage() {
 
           <div className="lg:col-span-5">
             <PanelPreview />
-          </div>
-        </div>
-      </section>
-
-      {/* Tarea 1: reemplaza el bloque de stats falsas (sitios publicados / puesta en línea / reservas
-          gestionadas) por un hook de captación honesto — Opción A del prompt (diagnóstico gratis).
-          Opciones descartadas, documentadas para que el equipo las evalúe después:
-          - Opción B: auto-chequeo de 5 preguntas con puntaje 0–5 (honesto, engancha por autodiagnóstico).
-          - Opción C: tres claims verificables ("somos de acá", "respondemos en el día",
-            "tomamos pocos proyectos por mes") en vez de un formulario. */}
-      <section className="border-t border-n-200 bg-paper-2">
-        <div className="mx-auto w-full max-w-[60rem] px-5 py-16 sm:px-8 lg:py-20">
-          <div className="max-w-2xl space-y-3">
-            <Eyebrow>Diagnóstico gratis</Eyebrow>
-            <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
-              ¿Cómo te ve un cliente que te busca en Google?
-            </h2>
-            <p className="text-[1.0625rem] leading-[1.55] text-ink-2 text-pretty">
-              Te hacemos un diagnóstico gratis de tu negocio en internet: si aparecés, cómo se ve tu sitio o tu
-              Instagram desde un celular, y qué te está costando clientes. Sin compromiso y sin vueltas.
-            </p>
-          </div>
-
-          <div className="mt-8 rounded-md border border-n-200 bg-surface p-6 sm:p-8">
-            <DiagnosticForm />
           </div>
         </div>
       </section>

@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { readSettings } from '@/lib/org/defaults'
 import * as demo from './demo'
-import type { Booking, Membership, Org, Viewer } from './types'
+import type { Booking, Lead, Membership, Org, Viewer } from './types'
 
 export * from './types'
 
@@ -261,6 +261,23 @@ export async function listAllPayments() {
   )
 }
 
-export async function listLeads() {
-  return demo.demoLeads()
+export async function listLeads(): Promise<Lead[]> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('leads')
+    .select('id, name, email, phone, message, source_path, status, created_at, orgs(name)')
+    .order('created_at', { ascending: false })
+    .limit(100)
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    phone: row.phone,
+    message: row.message,
+    sourcePath: row.source_path,
+    status: row.status,
+    createdAt: row.created_at,
+    orgName: row.orgs?.name ?? null,
+  }))
 }

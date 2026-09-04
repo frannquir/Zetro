@@ -14,7 +14,7 @@ export default async function AdminLeadsPage() {
 
   return (
     <>
-      <PageHeader title="Leads" description="Consultas que entraron por zetro.com." />
+      <PageHeader title="Leads" description="Consultas que entraron por zetro.app." />
 
       {leads.length === 0 ? (
         <EmptyState title="Todavía no llegó ninguna consulta" />
