@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useId, useMemo, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { Check, CircleCheckBig, Loader2, Minus, Plus } from 'lucide-react'
 import { z } from 'zod'
@@ -110,25 +110,62 @@ type Selection = Record<string, number> // addonId -> cantidad (0 = no seleccion
 
 const STORAGE_KEY = 'zetro_pricing_selection'
 
-function loadSelection(): Selection {
-  if (typeof window === 'undefined') return {}
+// la selección vive en localStorage, no en useState: leerla al renderizar rompe la hidratación,
+// y restaurarla en un effect dispara un render en cascada. useSyncExternalStore hace las dos cosas bien.
+const empty: Selection = {}
+const listeners = new Set<() => void>()
+
+let cached: Selection = empty
+let cachedFromStorage = false
+
+function parseSelection(raw: string | null): Selection {
+  if (!raw) return empty
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return {}
     const parsed = JSON.parse(raw)
-    if (parsed && typeof parsed === 'object') return parsed as Selection
-    return {}
+    return parsed && typeof parsed === 'object' ? (parsed as Selection) : empty
   } catch {
-    return {}
+    return empty
   }
 }
 
-function saveSelection(selection: Selection) {
+function readSelection(): Selection {
+  if (!cachedFromStorage) {
+    try {
+      cached = parseSelection(window.localStorage.getItem(STORAGE_KEY))
+    } catch {
+      cached = empty
+    }
+    cachedFromStorage = true
+  }
+  return cached
+}
+
+function serverSelection(): Selection {
+  return empty
+}
+
+function subscribeSelection(onChange: () => void) {
+  const fromAnotherTab = () => {
+    cachedFromStorage = false
+    onChange()
+  }
+  listeners.add(onChange)
+  window.addEventListener('storage', fromAnotherTab)
+  return () => {
+    listeners.delete(onChange)
+    window.removeEventListener('storage', fromAnotherTab)
+  }
+}
+
+function writeSelection(next: Selection) {
+  cached = next
+  cachedFromStorage = true
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(selection))
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
   } catch {
     // localStorage no disponible: la selección simplemente no persiste
   }
+  for (const listener of listeners) listener()
 }
 
 function sumRange(ranges: Money[]): Money {
@@ -142,31 +179,23 @@ function sumRange(ranges: Money[]): Money {
 }
 
 export function PricingBuilder() {
-  const [selection, setSelection] = useState<Selection>(loadSelection)
+  const selection = useSyncExternalStore(subscribeSelection, readSelection, serverSelection)
   const [pending, setPending] = useState(false)
   const [sent, setSent] = useState(false)
   const [errors, setErrors] = useState<ContactErrors>({})
   const [failure, setFailure] = useState<string | null>(null)
   const formId = useId()
 
-  useEffect(() => {
-    saveSelection(selection)
-  }, [selection])
-
   function toggle(addon: Addon) {
-    setSelection((prev) => {
-      const active = (prev[addon.id] ?? 0) > 0
-      const next = { ...prev }
-      if (active) delete next[addon.id]
-      else next[addon.id] = 1
-      return next
-    })
+    const next = { ...selection }
+    if ((next[addon.id] ?? 0) > 0) delete next[addon.id]
+    else next[addon.id] = 1
+    writeSelection(next)
   }
 
   function setCantidad(addon: Addon, cantidad: number) {
     const max = addon.maxCantidad ?? 5
-    const clamped = Math.min(Math.max(cantidad, 1), max)
-    setSelection((prev) => ({ ...prev, [addon.id]: clamped }))
+    writeSelection({ ...selection, [addon.id]: Math.min(Math.max(cantidad, 1), max) })
   }
 
   const activeAddons = PRICING.agregados.filter((a) => (selection[a.id] ?? 0) > 0)

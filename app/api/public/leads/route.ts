@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
   })
   if (error) {
     console.error('lead insert failed', error.code, error.message)
-    return apiError('server_error')
+    return apiError('server_error', { pg: error.code })
   }
 
   const budget = summarise(meta)
