@@ -35,6 +35,7 @@ type Addon = {
 }
 
 // Todos los montos viven acá. [[PENDIENTE]] = valor no confirmado por el equipo.
+// [[PENDIENTE: definir tratamiento de IVA]] — cuando se defina, sumarlo a la nota del punto de partida.
 const PRICING: {
   moneda: 'ARS'
   base: Money & { unidad: 'pago único' }
@@ -97,13 +98,27 @@ const PRICING: {
 
 const money = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
 
-function formatMoney(value: number | null) {
-  return value === null ? '[[PENDIENTE: precio]]' : money.format(value)
+/** Un rango está definido cuando el equipo cargó al menos un extremo en PRICING. */
+function hasPrice(range: Money) {
+  return range.min !== null || range.max !== null
 }
 
-function formatRange(range: Money) {
-  if (range.min === null && range.max === null) return '[[PENDIENTE: precio]]'
-  return `${formatMoney(range.min)} — ${formatMoney(range.max)}`
+/**
+ * Texto del rango, o `null` si todavía no hay números.
+ * Devolver `null` (en vez de un placeholder crudo) deja que cada lugar de la UI
+ * elija cómo se ve el estado "a definir".
+ */
+function formatRange(range: Money): string | null {
+  if (!hasPrice(range)) return null
+  if (range.min !== null && range.max !== null && range.min !== range.max) {
+    return `${money.format(range.min)} — ${money.format(range.max)}`
+  }
+  return money.format((range.min ?? range.max) as number)
+}
+
+/** Precio para el mail y el WhatsApp: cuando no hay números, se manda el estado cualitativo. */
+function rangeForEmail(range: Money) {
+  return formatRange(range) ?? 'a cotizar según alcance'
 }
 
 type Selection = Record<string, number> // addonId -> cantidad (0 = no seleccionado)
@@ -178,6 +193,21 @@ function sumRange(ranges: Money[]): Money {
   )
 }
 
+/** Fila del resumen: concepto a la izquierda, monto (o estado) a la derecha. */
+function SummaryLine({ label, detail, value }: { label: string; detail?: string; value: string | null }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 py-1.5">
+      <span className="text-[0.875rem] text-ink-2">
+        {label}
+        {detail ? <span className="text-ink-4"> {detail}</span> : null}
+      </span>
+      <span className={`shrink-0 text-[0.875rem] tnum ${value ? 'text-ink' : 'text-ink-4'}`}>
+        {value ?? 'a definir'}
+      </span>
+    </div>
+  )
+}
+
 export function PricingBuilder() {
   const selection = useSyncExternalStore(subscribeSelection, readSelection, serverSelection)
   const [pending, setPending] = useState(false)
@@ -186,8 +216,10 @@ export function PricingBuilder() {
   const [failure, setFailure] = useState<string | null>(null)
   const formId = useId()
 
+  // se lee del store y no de `selection`: dos toggles en el mismo tick comparten
+  // el valor del render y el segundo pisaría al primero.
   function toggle(addon: Addon) {
-    const next = { ...selection }
+    const next = { ...readSelection() }
     if ((next[addon.id] ?? 0) > 0) delete next[addon.id]
     else next[addon.id] = 1
     writeSelection(next)
@@ -195,7 +227,7 @@ export function PricingBuilder() {
 
   function setCantidad(addon: Addon, cantidad: number) {
     const max = addon.maxCantidad ?? 5
-    writeSelection({ ...selection, [addon.id]: Math.min(Math.max(cantidad, 1), max) })
+    writeSelection({ ...readSelection(), [addon.id]: Math.min(Math.max(cantidad, 1), max) })
   }
 
   const activeAddons = PRICING.agregados.filter((a) => (selection[a.id] ?? 0) > 0)
@@ -227,6 +259,9 @@ export function PricingBuilder() {
 
   const totalOnce = sumRange(oneTimeRanges)
   const totalMonthly = sumRange(monthlyRanges)
+  const totalOnceLabel = formatRange(totalOnce)
+  const totalMonthlyLabel = formatRange(totalMonthly)
+  const oneTimeAddons = activeAddons.filter((a) => a.unidad !== 'por mes').length
 
   const summaryLines = activeAddons.map((a) => {
     const qty = selection[a.id] ?? 1
@@ -239,8 +274,8 @@ export function PricingBuilder() {
     'Agregados seleccionados:',
     ...(summaryLines.length ? summaryLines.map((l) => `- ${l}`) : ['- Ninguno, solo el sitio base']),
     '',
-    `Inversión inicial estimada: ${formatRange(totalOnce)}`,
-    mantenimientoActivo ? `Mensual estimado: ${formatRange(totalMonthly)}` : '',
+    `Inversión inicial estimada: ${rangeForEmail(totalOnce)}`,
+    mantenimientoActivo ? `Mensual estimado: ${rangeForEmail(totalMonthly)}` : '',
   ]
     .filter(Boolean)
     .join('\n')
@@ -298,20 +333,33 @@ export function PricingBuilder() {
     else setFailure(result.error.message)
   }
 
+  const baseLabel = formatRange({ min: PRICING.base.min, max: PRICING.base.max })
+
   return (
-    <div className="space-y-5">
-      {/* Bloque 1 — Punto de partida */}
-      <div className="rounded-md border border-n-200 bg-surface p-5 sm:p-6">
-        <div className="sm:flex sm:items-start sm:justify-between sm:gap-8">
-          <div className="sm:max-w-xs">
-            <h3 className="text-lg font-medium text-ink">Todo arranca con tu sitio web</h3>
-            <p className="mt-2 text-2xl leading-none tracking-[-0.02em] font-semibold tnum text-ink">
-              Desde {formatMoney(PRICING.base.min)} a {formatMoney(PRICING.base.max)}
-            </p>
-            <p className="mt-1 text-[0.8125rem] text-ink-3">pago único · [[PENDIENTE: definir tratamiento de IVA]]</p>
+    <div className="space-y-3">
+      {/* Armador + resumen: un solo bloque en dos columnas. El total vive al lado de la
+          selección, así queda siempre a la vista sin necesidad de nada pegajoso. */}
+      <div className="grid gap-px overflow-hidden rounded-md border border-n-200 bg-n-200 lg:grid-cols-12">
+        {/* Columna izquierda — punto de partida + agregados */}
+        <div className="bg-surface p-5 sm:p-6 lg:col-span-8">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+            <div>
+              <p className="text-xs leading-none tracking-[0.06em] uppercase font-medium text-ink-4">
+                Punto de partida
+              </p>
+              <h3 className="mt-2 text-lg font-medium text-ink">Todo arranca con tu sitio web</h3>
+            </div>
+            <div className="sm:text-right">
+              {baseLabel ? (
+                <p className="text-2xl leading-none tracking-[-0.02em] font-semibold tnum text-ink">{baseLabel}</p>
+              ) : (
+                <p className="text-[0.9375rem] font-medium text-ink">Se cotiza según alcance</p>
+              )}
+              <p className="mt-1 text-[0.8125rem] text-ink-3">{PRICING.base.unidad}</p>
+            </div>
           </div>
 
-          <ul className="mt-4 grid grid-cols-2 gap-x-6 gap-2 text-[0.875rem] sm:mt-0 sm:shrink-0 lg:grid-cols-3">
+          <ul className="mt-4 grid gap-x-6 gap-y-1.5 text-[0.875rem] sm:grid-cols-2 lg:grid-cols-3">
             {[
               'Diseño a medida',
               'Versión para celular',
@@ -325,145 +373,171 @@ export function PricingBuilder() {
               </li>
             ))}
           </ul>
-        </div>
 
-        <p className="mt-4 border-t border-n-200 pt-3 text-[0.8125rem] text-ink-3 text-pretty">
-          El rango depende de la cantidad de secciones, del contenido que ya tengas y de la complejidad del diseño.
-          Te pasamos el número exacto después de charlar 15 minutos.
-        </p>
-      </div>
+          <p className="mt-3 text-[0.8125rem] text-ink-3 text-pretty">
+            El rango depende de la cantidad de secciones, del contenido que ya tengas y de la complejidad del diseño.
+            Te pasamos el número exacto después de charlar 15 minutos.
+          </p>
 
-      {/* Bloque 2 — Armador */}
-      <div>
-        <h3 className="text-lg font-medium text-ink">Armá tu presupuesto</h3>
-        <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-          {PRICING.agregados.map((addon) => {
-            const active = (selection[addon.id] ?? 0) > 0
-            const qty = selection[addon.id] ?? 1
-            return (
-              <div
-                key={addon.id}
-                role="button"
-                tabIndex={0}
-                aria-pressed={active}
-                onClick={() => toggle(addon)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    toggle(addon)
-                  }
-                }}
-                className={`cursor-pointer rounded-md border p-3.5 text-left transition-colors duration-150 ${
-                  active ? 'border-brand bg-brand-soft' : 'border-n-200 bg-surface hover:bg-n-100'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-[0.9375rem] font-medium text-ink">{addon.nombre}</p>
-                  <span
-                    aria-hidden="true"
-                    className={`flex size-5 shrink-0 items-center justify-center rounded-sm border ${
-                      active ? 'border-brand bg-brand text-paper' : 'border-n-300 bg-surface'
+          <div className="mt-5 border-t border-n-200 pt-5">
+            <h3 className="text-lg font-medium text-ink">Armá tu presupuesto</h3>
+            <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+              {PRICING.agregados.map((addon) => {
+                const active = (selection[addon.id] ?? 0) > 0
+                const qty = selection[addon.id] ?? 1
+                const precio = formatRange(addon.precio)
+                return (
+                  <div
+                    key={addon.id}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={active}
+                    onClick={() => toggle(addon)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        toggle(addon)
+                      }
+                    }}
+                    className={`cursor-pointer rounded-sm border p-3 text-left transition-colors duration-150 ${
+                      active ? 'border-brand bg-brand-soft' : 'border-n-200 bg-surface hover:bg-n-100'
                     }`}
                   >
-                    {active ? <Check className="size-3.5" /> : null}
-                  </span>
-                </div>
-                <p className="mt-1 text-[0.8125rem] text-ink-2 text-pretty">{addon.descripcion}</p>
-
-                <p className="mt-2 text-[0.8125rem] font-medium tnum text-ink">
-                  {formatRange(addon.precio)} <span className="font-normal text-ink-4">· {addon.unidad}</span>
-                </p>
-
-                {addon.cantidad ? (
-                  <div
-                    className="overflow-hidden transition-[max-height] duration-200 ease-out"
-                    style={{ maxHeight: active ? '40px' : '0px' }}
-                  >
-                    <div
-                      className="mt-2 flex w-fit items-center gap-2 rounded-sm border border-n-300 px-1"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        type="button"
-                        aria-label={`Restar ${addon.nombre}`}
-                        onClick={() => setCantidad(addon, qty - 1)}
-                        disabled={qty <= 1}
-                        className="flex size-7 items-center justify-center text-ink-2 disabled:opacity-40"
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-[0.9375rem] font-medium text-ink">{addon.nombre}</p>
+                      <span
+                        aria-hidden="true"
+                        className={`flex size-5 shrink-0 items-center justify-center rounded-sm border ${
+                          active ? 'border-brand bg-brand text-paper' : 'border-n-300 bg-surface'
+                        }`}
                       >
-                        <Minus className="size-3.5" />
-                      </button>
-                      <span className="min-w-4 text-center text-sm tnum text-ink">{qty}</span>
-                      <button
-                        type="button"
-                        aria-label={`Sumar ${addon.nombre}`}
-                        onClick={() => setCantidad(addon, qty + 1)}
-                        disabled={qty >= (addon.maxCantidad ?? 5)}
-                        className="flex size-7 items-center justify-center text-ink-2 disabled:opacity-40"
-                      >
-                        <Plus className="size-3.5" />
-                      </button>
+                        {active ? <Check className="size-3.5" /> : null}
+                      </span>
                     </div>
+                    <p className="mt-1 text-[0.8125rem] leading-[1.45] text-ink-2 text-pretty">{addon.descripcion}</p>
+
+                    <p className="mt-2 text-[0.8125rem] tnum">
+                      {precio ? (
+                        <>
+                          <span className="font-medium text-ink">{precio}</span>{' '}
+                          <span className="text-ink-4">· {addon.unidad}</span>
+                        </>
+                      ) : (
+                        <span className="text-ink-4">{addon.unidad}</span>
+                      )}
+                    </p>
+
+                    {addon.cantidad ? (
+                      <div
+                        className="overflow-hidden transition-[max-height] duration-200 ease-out"
+                        style={{ maxHeight: active ? '40px' : '0px' }}
+                      >
+                        <div
+                          className="mt-2 flex w-fit items-center gap-2 rounded-sm border border-n-300 bg-surface px-1"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            aria-label={`Restar ${addon.nombre}`}
+                            onClick={() => setCantidad(addon, qty - 1)}
+                            disabled={qty <= 1}
+                            className="flex size-7 items-center justify-center text-ink-2 disabled:opacity-40"
+                          >
+                            <Minus className="size-3.5" />
+                          </button>
+                          <span className="min-w-4 text-center text-sm tnum text-ink">{qty}</span>
+                          <button
+                            type="button"
+                            aria-label={`Sumar ${addon.nombre}`}
+                            onClick={() => setCantidad(addon, qty + 1)}
+                            disabled={qty >= (addon.maxCantidad ?? 5)}
+                            className="flex size-7 items-center justify-center text-ink-2 disabled:opacity-40"
+                          >
+                            <Plus className="size-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
-                ) : null}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Bloque 3 — Proyecto completo */}
-      <div className="rounded-md border-2 border-brand bg-ink p-5 text-paper sm:p-6">
-        <div className="sm:flex sm:items-center sm:justify-between sm:gap-6">
-          <div>
-            <h3 className="text-lg font-medium">Proyecto completo</h3>
-            <p className="mt-1.5 max-w-md text-[0.875rem] text-paper/80 text-pretty">
-              Sitio, panel de gestión, mantenimiento y todo lo que tu negocio necesite, trabajado como un solo
-              proyecto a largo plazo.
-            </p>
-          </div>
-          <div className="mt-4 shrink-0 sm:mt-0 sm:text-right">
-            <p className="text-lg font-semibold tracking-[-0.02em]">Lo armamos con vos</p>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="mt-2.5 border-paper/30 bg-transparent text-paper hover:bg-paper/10"
-            >
-              <Link href="/contacto">Hablemos de tu proyecto</Link>
-            </Button>
+                )
+              })}
+            </div>
           </div>
         </div>
-        <p className="mt-3 text-xs text-paper/70 text-pretty">
-          Cuando el proyecto es integral, el precio no sale de una lista: sale de entender tu negocio.
-        </p>
-      </div>
 
-      {/* Resumen pegajoso */}
-      <div
-        aria-live="polite"
-        className="sticky bottom-0 z-10 -mx-5 border-t border-n-200 bg-surface/95 px-5 py-4 backdrop-blur sm:mx-0 sm:rounded-md sm:border sm:px-6 lg:bottom-6"
-      >
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-1">
-            <p className="text-[0.9375rem] tnum text-ink">
-              Inversión inicial estimada: <span className="font-semibold">{formatRange(totalOnce)}</span>
-            </p>
-            {mantenimientoActivo ? (
-              <p className="text-[0.9375rem] tnum text-ink">
-                Mensual estimado: <span className="font-semibold">{formatRange(totalMonthly)}</span>
+        {/* Columna derecha — resumen y total. Sin sticky: acompaña a la selección por layout. */}
+        <div className="flex flex-col bg-paper-2 p-5 sm:p-6 lg:col-span-4">
+          <p className="text-xs leading-none tracking-[0.06em] uppercase font-medium text-ink-4">Tu presupuesto</p>
+
+          <div aria-live="polite" className="mt-4 flex-1">
+            <div className="divide-y divide-n-200 border-y border-n-200">
+              <SummaryLine label="Sitio base" value={baseLabel} />
+              {activeAddons.map((addon) => {
+                const qty = selection[addon.id] ?? 1
+                const precio = formatRange({
+                  min: addon.precio.min === null ? null : addon.precio.min * qty,
+                  max: addon.precio.max === null ? null : addon.precio.max * qty,
+                })
+                return (
+                  <SummaryLine
+                    key={addon.id}
+                    label={addon.nombre}
+                    detail={addon.cantidad ? `×${qty}` : undefined}
+                    value={precio}
+                  />
+                )
+              })}
+              {activeAddons.length === 0 ? (
+                <p className="py-1.5 text-[0.8125rem] text-ink-4">Sin agregados. Elegí lo que necesites.</p>
+              ) : null}
+            </div>
+
+            <div className="mt-4">
+              <p className="text-[0.8125rem] text-ink-3">Inversión inicial</p>
+              {totalOnceLabel ? (
+                <p className="mt-1 text-[1.75rem] leading-none tracking-[-0.02em] font-semibold tnum text-ink">
+                  {totalOnceLabel}
+                </p>
+              ) : (
+                <p className="mt-1 text-[1.25rem] leading-[1.2] tracking-[-0.02em] font-semibold text-ink text-balance">
+                  Se cotiza según alcance
+                </p>
+              )}
+              <p className="mt-1 text-[0.8125rem] text-ink-4">
+                {oneTimeAddons > 0
+                  ? `Sitio base + ${oneTimeAddons} agregado${oneTimeAddons > 1 ? 's' : ''} · pago único`
+                  : 'Solo el sitio base · pago único'}
               </p>
-            ) : null}
-            {summaryLines.length ? (
-              <p className="text-[0.8125rem] text-ink-3">{summaryLines.join(' · ')}</p>
-            ) : (
-              <p className="text-[0.8125rem] text-ink-3">Solo el sitio base, sin agregados.</p>
-            )}
+
+              {mantenimientoActivo ? (
+                <div className="mt-3 border-t border-n-200 pt-3">
+                  <p className="text-[0.8125rem] text-ink-3">Mensual</p>
+                  <p
+                    className={`mt-1 tnum ${
+                      totalMonthlyLabel
+                        ? 'text-lg font-semibold tracking-[-0.02em] text-ink'
+                        : 'text-[0.9375rem] font-medium text-ink'
+                    }`}
+                  >
+                    {totalMonthlyLabel ?? 'Se cotiza según alcance'}
+                  </p>
+                  <p className="mt-1 text-[0.8125rem] text-ink-4">Mantenimiento mensual · por mes</p>
+                </div>
+              ) : null}
+            </div>
           </div>
 
+          <p className="mt-5 text-xs leading-[1.45] text-ink-4 text-pretty">
+            Es una estimación para que te hagas una idea. Cada proyecto es distinto: el precio final sale después de
+            entender qué necesitás.
+          </p>
         </div>
 
+        {/* Pedido del presupuesto exacto — fila a ancho completo dentro de la misma tarjeta,
+            para que el total y el pedido se lean como un solo paso. */}
+        <div className="bg-surface p-5 sm:p-6 lg:col-span-12">
         {sent ? (
-          <Alert className="mt-6 border-l-ok">
+          <Alert className="border-l-ok">
             <CircleCheckBig className="text-ok" />
             <AlertTitle>Nos llegó tu pedido</AlertTitle>
             <AlertDescription>
@@ -471,7 +545,7 @@ export function PricingBuilder() {
             </AlertDescription>
           </Alert>
         ) : (
-          <form onSubmit={onSubmit} noValidate className="mt-6 space-y-4 border-t border-n-200 pt-6">
+          <form onSubmit={onSubmit} noValidate className="space-y-4">
             <p className="text-[0.9375rem] text-ink-2">
               Dejanos tus datos y te mandamos el presupuesto exacto con esta configuración.
             </p>
@@ -538,11 +612,29 @@ export function PricingBuilder() {
             </div>
           </form>
         )}
+        </div>
+      </div>
 
-        <p className="mt-3 text-xs text-ink-4">
-          Es una estimación para que te hagas una idea. Cada proyecto es distinto: el precio final sale después de
-          entender qué necesitás.
-        </p>
+      {/* Proyecto completo — barra compacta, fuera del armador */}
+      <div className="rounded-md border border-n-200 bg-ink p-5 text-paper sm:p-6 lg:flex lg:items-center lg:justify-between lg:gap-6">
+        <div className="max-w-xl">
+          <h3 className="text-lg font-medium">Proyecto completo</h3>
+          <p className="mt-1.5 text-[0.875rem] leading-[1.5] text-paper/80 text-pretty">
+            Sitio, panel de gestión, mantenimiento y todo lo que tu negocio necesite, trabajado como un solo proyecto
+            a largo plazo. Cuando el proyecto es integral, el precio no sale de una lista: sale de entender tu negocio.
+          </p>
+        </div>
+        <div className="mt-4 flex shrink-0 flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4 lg:mt-0">
+          <p className="text-[0.9375rem] font-semibold tracking-[-0.01em] text-paper/90">Lo armamos con vos</p>
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="border-paper/30 bg-transparent text-paper hover:bg-paper/10"
+          >
+            <Link href="/contacto">Hablemos de tu proyecto</Link>
+          </Button>
+        </div>
       </div>
     </div>
   )
