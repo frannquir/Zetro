@@ -130,7 +130,7 @@ export default function LandingPage() {
       </section>
 
       <section id="como-funciona" className="scroll-mt-20 border-t border-n-200">
-        <div className="mx-auto w-full max-w-[48rem] px-5 py-16 sm:px-8 lg:py-20">
+        <div className="mx-auto w-full max-w-[60rem] px-5 py-16 sm:px-8 lg:py-20">
           <div className="max-w-2xl space-y-3">
             <Eyebrow>Cómo funciona</Eyebrow>
             <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
@@ -184,8 +184,8 @@ export default function LandingPage() {
       </section>
 
       <section id="precios" className="scroll-mt-20 border-t border-n-200 bg-paper-2">
-        <div className="mx-auto w-full max-w-[52rem] px-5 py-16 sm:px-8 lg:py-20">
-          <div className="max-w-2xl space-y-3">
+        <div className="mx-auto w-full max-w-[75rem] px-5 py-12 sm:px-8 lg:py-16">
+          <div className="max-w-2xl space-y-2">
             <Eyebrow>Precios</Eyebrow>
             <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
               Armá tu presupuesto.
@@ -196,11 +196,11 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="mt-10">
+          <div className="mt-6">
             <PricingBuilder />
           </div>
 
-          <div className="mt-8">
+          <div className="mt-5">
             <MaintenanceBlock />
           </div>
         </div>

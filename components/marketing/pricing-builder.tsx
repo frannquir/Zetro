@@ -205,31 +205,35 @@ export function PricingBuilder() {
     : null
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {/* Bloque 1 — Punto de partida */}
-      <div className="rounded-md border border-n-200 bg-surface p-6 sm:p-8">
-        <h3 className="text-lg font-medium text-ink">Todo arranca con tu sitio web</h3>
-        <p className="mt-3 text-2xl leading-none tracking-[-0.02em] font-semibold tnum text-ink sm:text-3xl">
-          Desde {formatMoney(PRICING.base.min)} a {formatMoney(PRICING.base.max)}
-        </p>
-        <p className="text-[0.8125rem] text-ink-3">pago único · [[PENDIENTE: definir tratamiento de IVA]]</p>
+      <div className="rounded-md border border-n-200 bg-surface p-5 sm:p-6">
+        <div className="sm:flex sm:items-start sm:justify-between sm:gap-8">
+          <div className="sm:max-w-xs">
+            <h3 className="text-lg font-medium text-ink">Todo arranca con tu sitio web</h3>
+            <p className="mt-2 text-2xl leading-none tracking-[-0.02em] font-semibold tnum text-ink">
+              Desde {formatMoney(PRICING.base.min)} a {formatMoney(PRICING.base.max)}
+            </p>
+            <p className="mt-1 text-[0.8125rem] text-ink-3">pago único · [[PENDIENTE: definir tratamiento de IVA]]</p>
+          </div>
 
-        <ul className="mt-5 grid gap-2.5 text-[0.9375rem] sm:grid-cols-2">
-          {[
-            'Diseño a medida',
-            'Versión para celular',
-            'Formulario de contacto',
-            'Carga de contenidos inicial',
-            'Publicación y dominio configurado',
-          ].map((item) => (
-            <li key={item} className="flex gap-2.5">
-              <Check className="mt-0.5 size-4 shrink-0 text-brand" />
-              <span className="text-ink-2">{item}</span>
-            </li>
-          ))}
-        </ul>
+          <ul className="mt-4 grid grid-cols-2 gap-x-6 gap-2 text-[0.875rem] sm:mt-0 sm:shrink-0 lg:grid-cols-3">
+            {[
+              'Diseño a medida',
+              'Versión para celular',
+              'Formulario de contacto',
+              'Carga de contenidos inicial',
+              'Publicación y dominio configurado',
+            ].map((item) => (
+              <li key={item} className="flex gap-2">
+                <Check className="mt-0.5 size-3.5 shrink-0 text-brand" />
+                <span className="text-ink-2">{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        <p className="mt-5 text-[0.9375rem] text-ink-3 text-pretty">
+        <p className="mt-4 border-t border-n-200 pt-3 text-[0.8125rem] text-ink-3 text-pretty">
           El rango depende de la cantidad de secciones, del contenido que ya tengas y de la complejidad del diseño.
           Te pasamos el número exacto después de charlar 15 minutos.
         </p>
@@ -238,7 +242,7 @@ export function PricingBuilder() {
       {/* Bloque 2 — Armador */}
       <div>
         <h3 className="text-lg font-medium text-ink">Armá tu presupuesto</h3>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
           {PRICING.agregados.map((addon) => {
             const active = (selection[addon.id] ?? 0) > 0
             const qty = selection[addon.id] ?? 1
@@ -255,15 +259,12 @@ export function PricingBuilder() {
                     toggle(addon)
                   }
                 }}
-                className={`cursor-pointer rounded-md border p-5 text-left transition-colors duration-150 ${
+                className={`cursor-pointer rounded-md border p-3.5 text-left transition-colors duration-150 ${
                   active ? 'border-brand bg-brand-soft' : 'border-n-200 bg-surface hover:bg-n-100'
                 }`}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-ink">{addon.nombre}</p>
-                    <p className="mt-1 text-[0.875rem] text-ink-2 text-pretty">{addon.descripcion}</p>
-                  </div>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-[0.9375rem] font-medium text-ink">{addon.nombre}</p>
                   <span
                     aria-hidden="true"
                     className={`flex size-5 shrink-0 items-center justify-center rounded-sm border ${
@@ -273,18 +274,19 @@ export function PricingBuilder() {
                     {active ? <Check className="size-3.5" /> : null}
                   </span>
                 </div>
+                <p className="mt-1 text-[0.8125rem] text-ink-2 text-pretty">{addon.descripcion}</p>
 
-                <p className="mt-3 text-[0.9375rem] font-medium tnum text-ink">
+                <p className="mt-2 text-[0.8125rem] font-medium tnum text-ink">
                   {formatRange(addon.precio)} <span className="font-normal text-ink-4">· {addon.unidad}</span>
                 </p>
 
                 {addon.cantidad ? (
                   <div
-                    className="mt-3 overflow-hidden transition-[max-height] duration-200 ease-out"
-                    style={{ maxHeight: active ? '48px' : '0px' }}
+                    className="overflow-hidden transition-[max-height] duration-200 ease-out"
+                    style={{ maxHeight: active ? '40px' : '0px' }}
                   >
                     <div
-                      className="flex w-fit items-center gap-3 rounded-sm border border-n-300 px-1"
+                      className="mt-2 flex w-fit items-center gap-2 rounded-sm border border-n-300 px-1"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <button
@@ -292,9 +294,9 @@ export function PricingBuilder() {
                         aria-label={`Restar ${addon.nombre}`}
                         onClick={() => setCantidad(addon, qty - 1)}
                         disabled={qty <= 1}
-                        className="flex size-8 items-center justify-center text-ink-2 disabled:opacity-40"
+                        className="flex size-7 items-center justify-center text-ink-2 disabled:opacity-40"
                       >
-                        <Minus className="size-4" />
+                        <Minus className="size-3.5" />
                       </button>
                       <span className="min-w-4 text-center text-sm tnum text-ink">{qty}</span>
                       <button
@@ -302,9 +304,9 @@ export function PricingBuilder() {
                         aria-label={`Sumar ${addon.nombre}`}
                         onClick={() => setCantidad(addon, qty + 1)}
                         disabled={qty >= (addon.maxCantidad ?? 5)}
-                        className="flex size-8 items-center justify-center text-ink-2 disabled:opacity-40"
+                        className="flex size-7 items-center justify-center text-ink-2 disabled:opacity-40"
                       >
-                        <Plus className="size-4" />
+                        <Plus className="size-3.5" />
                       </button>
                     </div>
                   </div>
@@ -313,6 +315,33 @@ export function PricingBuilder() {
             )
           })}
         </div>
+      </div>
+
+      {/* Bloque 3 — Proyecto completo */}
+      <div className="rounded-md border-2 border-brand bg-ink p-5 text-paper sm:p-6">
+        <div className="sm:flex sm:items-center sm:justify-between sm:gap-6">
+          <div>
+            <h3 className="text-lg font-medium">Proyecto completo</h3>
+            <p className="mt-1.5 max-w-md text-[0.875rem] text-paper/80 text-pretty">
+              Sitio, panel de gestión, mantenimiento y todo lo que tu negocio necesite, trabajado como un solo
+              proyecto a largo plazo.
+            </p>
+          </div>
+          <div className="mt-4 shrink-0 sm:mt-0 sm:text-right">
+            <p className="text-lg font-semibold tracking-[-0.02em]">Lo armamos con vos</p>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="mt-2.5 border-paper/30 bg-transparent text-paper hover:bg-paper/10"
+            >
+              <Link href="/contacto">Hablemos de tu proyecto</Link>
+            </Button>
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-paper/70 text-pretty">
+          Cuando el proyecto es integral, el precio no sale de una lista: sale de entender tu negocio.
+        </p>
       </div>
 
       {/* Resumen pegajoso */}
@@ -354,22 +383,6 @@ export function PricingBuilder() {
           Es una estimación para que te hagas una idea. Cada proyecto es distinto: el precio final sale después de
           entender qué necesitás.
         </p>
-      </div>
-
-      {/* Bloque 3 — Proyecto completo */}
-      <div className="rounded-md border-2 border-brand bg-ink p-6 text-paper sm:p-8">
-        <h3 className="text-lg font-medium">Proyecto completo</h3>
-        <p className="mt-2 max-w-lg text-[0.9375rem] text-paper/80 text-pretty">
-          Sitio, panel de gestión, mantenimiento y todo lo que tu negocio necesite, trabajado como un solo proyecto a
-          largo plazo.
-        </p>
-        <p className="mt-4 text-xl font-semibold tracking-[-0.02em]">Lo armamos con vos</p>
-        <p className="mt-2 text-[0.8125rem] text-paper/70 text-pretty">
-          Cuando el proyecto es integral, el precio no sale de una lista: sale de entender tu negocio.
-        </p>
-        <Button asChild size="lg" variant="outline" className="mt-5 border-paper/30 bg-transparent text-paper hover:bg-paper/10">
-          <Link href="/contacto">Hablemos de tu proyecto</Link>
-        </Button>
       </div>
     </div>
   )
