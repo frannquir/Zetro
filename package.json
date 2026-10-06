@@ -12,7 +12,8 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > lib/supabase/types.ts",
-    "rls:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/rls-check.ts"
+    "rls:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/rls-check.ts",
+    "import:org": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/import-org.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.5",

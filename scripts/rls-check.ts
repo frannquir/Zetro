@@ -12,6 +12,7 @@ const tables = [
   'customers',
   'bookings',
   'booking_events',
+  'payment_records',
 ]
 
 const required = ['RLS_CHECK_OWNER', 'RLS_CHECK_STAFF', 'RLS_CHECK_OUTSIDER', 'RLS_CHECK_PASSWORD']
@@ -206,6 +207,53 @@ for (const [label, supabase] of [
     .insert({ booking_id: bookingId ?? randomUUID(), org_id: orgId, to_status: 'confirmed' })
   check(`${label} insert into booking_events is denied`, error?.code === '42501', error?.code ?? 'no error')
 }
+
+console.log('\n5. payment_records are platform-admin writes and own-org reads')
+const period = `${new Date().getUTCFullYear()}-01-01`
+for (const [label, session] of [
+  ['owner', owner.supabase],
+  ['staff', staff.supabase],
+] as const) {
+  const { error } = await session
+    .from('payment_records')
+    .insert({ org_id: orgId, period_month: period, amount_cents: 1 })
+  check(`${label} insert into payment_records is denied`, error?.code === '42501', error?.code ?? 'no error')
+}
+
+const ownPayments = await owner.supabase.from('payment_records').select('org_id').eq('org_id', orgId)
+const theirPayments = await outsider.supabase.from('payment_records').select('org_id').eq('org_id', orgId)
+check(
+  `outsider reads no ${orgName} payment record`,
+  (theirPayments.data?.length ?? 0) === 0,
+  theirPayments.error?.code ?? undefined,
+)
+if ((ownPayments.data?.length ?? 0) === 0) {
+  skip(`${orgName} owner reads its own payment records`, 'no payment_records in this org, seed it to make this meaningful')
+} else {
+  check(`${orgName} owner reads its own payment records`, true, `${ownPayments.data?.length} rows`)
+}
+
+console.log('\n6. rpcs guard the org themselves, not just through rls')
+const year = new Date().getUTCFullYear()
+const range = { p_org: orgId, p_from: `${year}-01-01`, p_to: `${year}-12-31` }
+
+const ownSummary = await owner.supabase.rpc('dashboard_summary', range)
+check(
+  `${orgName} owner reads dashboard_summary`,
+  ownSummary.error === null && (ownSummary.data?.length ?? 0) === 1,
+  ownSummary.error?.message ?? `${ownSummary.data?.length ?? 0} rows`,
+)
+
+// rls alone would hand an outsider a row of zeros, which reads as a measurement
+const theirSummary = await outsider.supabase.rpc('dashboard_summary', range)
+check(
+  'outsider gets forbidden, not a row of zeros',
+  theirSummary.error?.message === 'forbidden',
+  theirSummary.error?.message ?? `LEAK, ${theirSummary.data?.length ?? 0} rows`,
+)
+
+const anonSummary = await anon.rpc('dashboard_summary', range)
+check('anon has no execute grant on dashboard_summary', anonSummary.error?.code === '42501', anonSummary.error?.code ?? 'no error')
 
 if (bookingId) await staff.supabase.from('bookings').delete().eq('id', bookingId)
 

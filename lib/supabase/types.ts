@@ -538,6 +538,66 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_records: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          due_date: string | null
+          id: string
+          method: string | null
+          note: string | null
+          org_id: string
+          paid_at: string | null
+          period_month: string
+          recorded_by: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          due_date?: string | null
+          id?: string
+          method?: string | null
+          note?: string | null
+          org_id: string
+          paid_at?: string | null
+          period_month: string
+          recorded_by?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          due_date?: string | null
+          id?: string
+          method?: string | null
+          note?: string | null
+          org_id?: string
+          paid_at?: string | null
+          period_month?: string
+          recorded_by?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_records_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_records_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -846,6 +906,22 @@ export type Database = {
           p_role: Database["public"]["Enums"]["member_role"]
         }
         Returns: Json
+      }
+      dashboard_summary: {
+        Args: { p_from: string; p_org: string; p_to: string }
+        Returns: {
+          bookings_delta: number
+          bookings_next_7: number
+          bookings_today: number
+          cancellations: number
+          customers_delta: number
+          live_visitors: number
+          new_customers: number
+          occupancy: number
+          pageviews: number
+          pageviews_delta: number
+          top_path: string
+        }[]
       }
       get_availability: {
         Args: {
