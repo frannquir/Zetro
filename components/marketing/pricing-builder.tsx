@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useMemo, useState, useSyncExternalStore } from 'react'
+import { useId, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { Check, CircleCheckBig, Loader2, Minus, Plus } from 'lucide-react'
 import { z } from 'zod'
@@ -28,75 +28,120 @@ type Addon = {
   id: string
   nombre: string
   descripcion: string
-  unidad: 'pago único' | 'por mes' | 'por sección'
-  precio: Money
+  alta: Money // pago único
+  abono: Money // por mes
   cantidad: boolean
   maxCantidad?: number
 }
 
-// Todos los montos viven acá. [[PENDIENTE]] = valor no confirmado por el equipo.
+// Todos los montos viven acá, en USD. Un `null` es un valor sin definir (la tabla de precios trae un guion).
 // [[PENDIENTE: definir tratamiento de IVA]] — cuando se defina, sumarlo a la nota del punto de partida.
+const NONE: Money = { min: null, max: null }
+
 const PRICING: {
-  moneda: 'ARS'
-  base: Money & { unidad: 'pago único' }
+  moneda: 'USD'
+  base: { nombre: string; alta: Money; abono: Money }
   agregados: Addon[]
 } = {
-  moneda: 'ARS',
-  base: { min: null, max: null, unidad: 'pago único' },
+  moneda: 'USD',
+  base: { nombre: 'Sitio web', alta: { min: 60, max: 96 }, abono: { min: 7.2, max: 9 } },
   agregados: [
     {
       id: 'panel',
       nombre: 'Panel de gestión',
       descripcion: 'Cambiás textos, fotos y precios vos mismo, sin depender de nadie.',
-      unidad: 'pago único',
-      precio: { min: null, max: null },
+      alta: { min: 30, max: 54 },
+      abono: { min: 3.6, max: 6 },
       cantidad: false,
     },
     {
-      id: 'mantenimiento',
-      nombre: 'Mantenimiento mensual',
-      descripcion: 'Nos ocupamos de que el sitio siga funcionando. Ver definición abajo.',
-      unidad: 'por mes',
-      precio: { min: null, max: null },
+      id: 'reservas',
+      nombre: 'Reservas y turnos',
+      descripcion: 'Tus clientes reservan sin escribirte.',
+      alta: { min: 54, max: 90 },
+      abono: { min: 4.8, max: 8.4 },
       cantidad: false,
     },
     {
-      id: 'secciones',
-      nombre: 'Secciones adicionales',
-      descripcion: 'Sumás páginas: catálogo, sucursales, blog, preguntas frecuentes.',
-      unidad: 'por sección',
-      precio: { min: null, max: null },
+      id: 'clases',
+      nombre: 'Clases con cupo',
+      descripcion: 'Clases con cupo limitado e inscripción online.',
+      alta: { min: 48, max: 78 },
+      abono: { min: 4.8, max: 8.4 },
+      cantidad: false,
+    },
+    {
+      id: 'carta',
+      nombre: 'Carta digital',
+      descripcion: 'Tu carta o catálogo con precios siempre actualizados.',
+      alta: { min: 36, max: 60 },
+      abono: { min: 3, max: 4.8 },
+      cantidad: false,
+    },
+    {
+      id: 'eventos',
+      nombre: 'Eventos',
+      descripcion: 'Publicás eventos y recibís inscripciones.',
+      alta: { min: 30, max: 54 },
+      abono: { min: 3, max: 4.8 },
+      cantidad: false,
+    },
+    {
+      id: 'pagos',
+      nombre: 'Registro de pagos',
+      descripcion: 'Llevás el control de los pagos de tus clientes.',
+      alta: { min: 30, max: 48 },
+      abono: { min: 2.4, max: 4.2 },
+      cantidad: false,
+    },
+    {
+      id: 'sede',
+      nombre: 'Sede adicional',
+      descripcion: 'Sumás otra sucursal o local.',
+      alta: { min: 24, max: 42 },
+      abono: { min: 3, max: 4.8 },
       cantidad: true,
       maxCantidad: 5,
     },
     {
-      id: 'turnos',
-      nombre: 'Turnos o reservas online',
-      descripcion: 'Tus clientes reservan sin escribirte.',
-      unidad: 'pago único',
-      precio: { min: null, max: null },
+      id: 'pagina',
+      nombre: 'Página o sección extra',
+      descripcion: 'Sumás páginas: catálogo, blog, preguntas frecuentes.',
+      alta: { min: 30, max: 54 },
+      abono: NONE,
+      cantidad: true,
+      maxCantidad: 5,
+    },
+    {
+      id: 'contenido',
+      nombre: 'Carga de contenido',
+      descripcion: 'Nos ocupamos de cargar tus textos, fotos y datos.',
+      alta: { min: 24, max: 42 },
+      abono: NONE,
       cantidad: false,
     },
     {
-      id: 'tienda',
-      nombre: 'Tienda / catálogo con precios',
-      descripcion: 'Mostrás productos y precios actualizados.',
-      unidad: 'pago único',
-      precio: { min: null, max: null },
-      cantidad: false,
-    },
-    {
-      id: 'seo',
-      nombre: 'SEO local',
-      descripcion: 'Que te encuentren cuando buscan tu rubro en tu ciudad.',
-      unidad: 'pago único',
-      precio: { min: null, max: null },
+      id: 'tablero',
+      nombre: 'Tablero de resumen',
+      descripcion: 'Una vista con los números clave de tu negocio.',
+      alta: NONE,
+      abono: NONE,
       cantidad: false,
     },
   ],
 }
 
-const money = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
+const money = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+const moneyCents = new Intl.NumberFormat('es-AR', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
+function formatAmount(n: number) {
+  return (Number.isInteger(n) ? money : moneyCents).format(n)
+}
 
 /** Un rango está definido cuando el equipo cargó al menos un extremo en PRICING. */
 function hasPrice(range: Money) {
@@ -111,9 +156,16 @@ function hasPrice(range: Money) {
 function formatRange(range: Money): string | null {
   if (!hasPrice(range)) return null
   if (range.min !== null && range.max !== null && range.min !== range.max) {
-    return `${money.format(range.min)} — ${money.format(range.max)}`
+    return `${formatAmount(range.min)} — ${formatAmount(range.max)}`
   }
-  return money.format((range.min ?? range.max) as number)
+  return formatAmount((range.min ?? range.max) as number)
+}
+
+function scale(range: Money, qty: number): Money {
+  return {
+    min: range.min === null ? null : range.min * qty,
+    max: range.max === null ? null : range.max * qty,
+  }
 }
 
 /** Precio para el mail y el WhatsApp: cuando no hay números, se manda el estado cualitativo. */
@@ -183,12 +235,10 @@ function writeSelection(next: Selection) {
   for (const listener of listeners) listener()
 }
 
+/** Suma rangos; un ítem sin precio no aporta (queda "a cotizar" en su propia fila). */
 function sumRange(ranges: Money[]): Money {
   return ranges.reduce<Money>(
-    (acc, r) => ({
-      min: acc.min === null || r.min === null ? null : acc.min + r.min,
-      max: acc.max === null || r.max === null ? null : acc.max + r.max,
-    }),
+    (acc, r) => ({ min: (acc.min ?? 0) + (r.min ?? 0), max: (acc.max ?? 0) + (r.max ?? 0) }),
     { min: 0, max: 0 },
   )
 }
@@ -202,7 +252,7 @@ function SummaryLine({ label, detail, value }: { label: string; detail?: string;
         {detail ? <span className="text-ink-4"> {detail}</span> : null}
       </span>
       <span className={`shrink-0 text-[0.875rem] tnum ${value ? 'text-ink' : 'text-ink-4'}`}>
-        {value ?? 'a definir'}
+        {value ?? 'a cotizar'}
       </span>
     </div>
   )
@@ -231,37 +281,17 @@ export function PricingBuilder() {
   }
 
   const activeAddons = PRICING.agregados.filter((a) => (selection[a.id] ?? 0) > 0)
-  const mantenimientoActivo = (selection.mantenimiento ?? 0) > 0
 
-  const oneTimeRanges = useMemo(
-    () => [
-      { min: PRICING.base.min, max: PRICING.base.max },
-      ...activeAddons
-        .filter((a) => a.unidad !== 'por mes')
-        .map((a) => {
-          const qty = selection[a.id] ?? 1
-          return {
-            min: a.precio.min === null ? null : a.precio.min * qty,
-            max: a.precio.max === null ? null : a.precio.max * qty,
-          }
-        }),
-    ],
-    [activeAddons, selection],
-  )
-
-  const monthlyRanges = useMemo(
-    () =>
-      activeAddons
-        .filter((a) => a.unidad === 'por mes')
-        .map((a) => ({ min: a.precio.min, max: a.precio.max })),
-    [activeAddons],
-  )
-
-  const totalOnce = sumRange(oneTimeRanges)
-  const totalMonthly = sumRange(monthlyRanges)
+  const totalOnce = sumRange([
+    PRICING.base.alta,
+    ...activeAddons.map((a) => scale(a.alta, selection[a.id] ?? 1)),
+  ])
+  const totalMonthly = sumRange([
+    PRICING.base.abono,
+    ...activeAddons.map((a) => scale(a.abono, selection[a.id] ?? 1)),
+  ])
   const totalOnceLabel = formatRange(totalOnce)
   const totalMonthlyLabel = formatRange(totalMonthly)
-  const oneTimeAddons = activeAddons.filter((a) => a.unidad !== 'por mes').length
 
   const summaryLines = activeAddons.map((a) => {
     const qty = selection[a.id] ?? 1
@@ -272,13 +302,11 @@ export function PricingBuilder() {
     'Quiero pedir el presupuesto exacto para mi negocio.',
     '',
     'Agregados seleccionados:',
-    ...(summaryLines.length ? summaryLines.map((l) => `- ${l}`) : ['- Ninguno, solo el sitio base']),
+    ...(summaryLines.length ? summaryLines.map((l) => `- ${l}`) : ['- Ninguno, solo el sitio web']),
     '',
-    `Inversión inicial estimada: ${rangeForEmail(totalOnce)}`,
-    mantenimientoActivo ? `Mensual estimado: ${rangeForEmail(totalMonthly)}` : '',
-  ]
-    .filter(Boolean)
-    .join('\n')
+    `Alta estimada (pago único): ${rangeForEmail(totalOnce)}`,
+    `Abono mensual estimado: ${rangeForEmail(totalMonthly)}`,
+  ].join('\n')
 
   const whatsappHref = WHATSAPP_NUMBER
     ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(budgetBody)}`
@@ -324,7 +352,7 @@ export function PricingBuilder() {
       meta: {
         selection: summaryLines,
         once: formatRange(totalOnce),
-        monthly: mantenimientoActivo ? formatRange(totalMonthly) : null,
+        monthly: formatRange(totalMonthly),
       },
     })
 
@@ -333,7 +361,8 @@ export function PricingBuilder() {
     else setFailure(result.error.message)
   }
 
-  const baseLabel = formatRange({ min: PRICING.base.min, max: PRICING.base.max })
+  const baseLabel = formatRange(PRICING.base.alta)
+  const baseAbonoLabel = formatRange(PRICING.base.abono)
 
   return (
     <div className="space-y-3">
@@ -350,12 +379,10 @@ export function PricingBuilder() {
               <h3 className="mt-2 text-lg font-medium text-ink">Todo arranca con tu sitio web</h3>
             </div>
             <div className="sm:text-right">
-              {baseLabel ? (
-                <p className="text-2xl leading-none tracking-[-0.02em] font-semibold tnum text-ink">{baseLabel}</p>
-              ) : (
-                <p className="text-[0.9375rem] font-medium text-ink">Se cotiza según alcance</p>
-              )}
-              <p className="mt-1 text-[0.8125rem] text-ink-3">{PRICING.base.unidad}</p>
+              <p className="text-2xl leading-none tracking-[-0.02em] font-semibold tnum text-ink">{baseLabel}</p>
+              <p className="mt-1 text-[0.8125rem] text-ink-3 tnum">
+                alta · y {baseAbonoLabel} por mes de abono
+              </p>
             </div>
           </div>
 
@@ -385,7 +412,8 @@ export function PricingBuilder() {
               {PRICING.agregados.map((addon) => {
                 const active = (selection[addon.id] ?? 0) > 0
                 const qty = selection[addon.id] ?? 1
-                const precio = formatRange(addon.precio)
+                const alta = formatRange(addon.alta)
+                const abono = formatRange(addon.abono)
                 return (
                   <div
                     key={addon.id}
@@ -416,16 +444,26 @@ export function PricingBuilder() {
                     </div>
                     <p className="mt-1 text-[0.8125rem] leading-[1.45] text-ink-2 text-pretty">{addon.descripcion}</p>
 
-                    <p className="mt-2 text-[0.8125rem] tnum">
-                      {precio ? (
+                    <div className="mt-2 space-y-0.5 text-[0.8125rem] tnum">
+                      {alta || abono ? (
                         <>
-                          <span className="font-medium text-ink">{precio}</span>{' '}
-                          <span className="text-ink-4">· {addon.unidad}</span>
+                          {alta ? (
+                            <p>
+                              <span className="font-medium text-ink">{alta}</span>{' '}
+                              <span className="text-ink-4">· alta</span>
+                            </p>
+                          ) : null}
+                          {abono ? (
+                            <p>
+                              <span className="font-medium text-ink">{abono}</span>{' '}
+                              <span className="text-ink-4">· por mes</span>
+                            </p>
+                          ) : null}
                         </>
                       ) : (
-                        <span className="text-ink-4">{addon.unidad}</span>
+                        <p className="text-ink-4">a cotizar</p>
                       )}
-                    </p>
+                    </div>
 
                     {addon.cantidad ? (
                       <div
@@ -471,19 +509,15 @@ export function PricingBuilder() {
 
           <div aria-live="polite" className="mt-4 flex-1">
             <div className="divide-y divide-n-200 border-y border-n-200">
-              <SummaryLine label="Sitio base" value={baseLabel} />
+              <SummaryLine label="Sitio web" value={baseLabel} />
               {activeAddons.map((addon) => {
                 const qty = selection[addon.id] ?? 1
-                const precio = formatRange({
-                  min: addon.precio.min === null ? null : addon.precio.min * qty,
-                  max: addon.precio.max === null ? null : addon.precio.max * qty,
-                })
                 return (
                   <SummaryLine
                     key={addon.id}
                     label={addon.nombre}
                     detail={addon.cantidad ? `×${qty}` : undefined}
-                    value={precio}
+                    value={formatRange(scale(addon.alta, qty))}
                   />
                 )
               })}
@@ -493,37 +527,21 @@ export function PricingBuilder() {
             </div>
 
             <div className="mt-4">
-              <p className="text-[0.8125rem] text-ink-3">Inversión inicial</p>
-              {totalOnceLabel ? (
-                <p className="mt-1 text-[1.75rem] leading-none tracking-[-0.02em] font-semibold tnum text-ink">
-                  {totalOnceLabel}
-                </p>
-              ) : (
-                <p className="mt-1 text-[1.25rem] leading-[1.2] tracking-[-0.02em] font-semibold text-ink text-balance">
-                  Se cotiza según alcance
-                </p>
-              )}
+              <p className="text-[0.8125rem] text-ink-3">Alta</p>
+              <p className="mt-1 text-[1.75rem] leading-none tracking-[-0.02em] font-semibold tnum text-ink">
+                {totalOnceLabel}
+              </p>
               <p className="mt-1 text-[0.8125rem] text-ink-4">
-                {oneTimeAddons > 0
-                  ? `Sitio base + ${oneTimeAddons} agregado${oneTimeAddons > 1 ? 's' : ''} · pago único`
-                  : 'Solo el sitio base · pago único'}
+                {activeAddons.length > 0
+                  ? `Sitio web + ${activeAddons.length} agregado${activeAddons.length > 1 ? 's' : ''} · pago único`
+                  : 'Solo el sitio web · pago único'}
               </p>
 
-              {mantenimientoActivo ? (
-                <div className="mt-3 border-t border-n-200 pt-3">
-                  <p className="text-[0.8125rem] text-ink-3">Mensual</p>
-                  <p
-                    className={`mt-1 tnum ${
-                      totalMonthlyLabel
-                        ? 'text-lg font-semibold tracking-[-0.02em] text-ink'
-                        : 'text-[0.9375rem] font-medium text-ink'
-                    }`}
-                  >
-                    {totalMonthlyLabel ?? 'Se cotiza según alcance'}
-                  </p>
-                  <p className="mt-1 text-[0.8125rem] text-ink-4">Mantenimiento mensual · por mes</p>
-                </div>
-              ) : null}
+              <div className="mt-3 border-t border-n-200 pt-3">
+                <p className="text-[0.8125rem] text-ink-3">Abono mensual</p>
+                <p className="mt-1 text-lg font-semibold tracking-[-0.02em] tnum text-ink">{totalMonthlyLabel}</p>
+                <p className="mt-1 text-[0.8125rem] text-ink-4">por mes · precios en dólares</p>
+              </div>
             </div>
           </div>
 
