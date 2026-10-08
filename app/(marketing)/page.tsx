@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { VerticalIllustration } from '@/components/marketing/vertical-illustration'
 import { FeaturesBento } from '@/components/marketing/features-bento'
@@ -160,16 +160,25 @@ export default function LandingPage() {
 
       <section id="precios" className="scroll-mt-20 border-t border-n-200 bg-paper-2">
         <div className="mx-auto w-full max-w-[75rem] px-5 py-12 sm:px-8 lg:py-14">
-          <div className="max-w-2xl space-y-2">
+          <div className="max-w-2xl space-y-3">
             <Eyebrow>Precios</Eyebrow>
-            <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
-              Armá tu presupuesto.
+            <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink sm:text-[2.5rem]">
+              Precios claros, desde US$&nbsp;60.
             </h2>
             <p className="text-[1.0625rem] leading-[1.55] text-ink-2 text-pretty">
-              Cada proyecto es distinto, así que no hay packs cerrados. Elegí lo que necesitás y te llevás un rango
-              claro para arrancar la conversación.
+              Sin packs cerrados ni letra chica. Elegí lo que tu negocio necesita y mirá al instante cuánto cuesta el
+              alta y el abono mensual.
             </p>
           </div>
+
+          <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[0.875rem] text-ink-2">
+            {['Pago único de alta', 'Abono mensual', 'Sin compromiso', 'Respuesta en el día hábil'].map((item) => (
+              <li key={item} className="flex items-center gap-2">
+                <Check className="size-4 text-brand" />
+                {item}
+              </li>
+            ))}
+          </ul>
 
           <div className="mt-5">
             <PricingBuilder />
