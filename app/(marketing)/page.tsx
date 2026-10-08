@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { PanelPreview } from '@/components/marketing/panel-preview'
 import { VerticalIllustration } from '@/components/marketing/vertical-illustration'
 import { FeaturesBento } from '@/components/marketing/features-bento'
 import { HowItWorks } from '@/components/marketing/how-it-works'
@@ -50,7 +49,8 @@ const jsonLd = {
   name: 'Zetro',
   email: 'contacto@zetro.app',
   areaServed: 'Buenos Aires, Argentina',
-  url: '[[PENDIENTE: url canónica del sitio]]',
+  // url canónica: agregar cuando esté el dominio definitivo. Sin valor real no va
+  // al JSON-LD: Google lee esto y un placeholder ahí es peor que la ausencia.
 }
 
 export default function LandingPage() {
@@ -60,8 +60,8 @@ export default function LandingPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <section className="border-b border-n-200">
-        <div className="mx-auto grid w-full max-w-[75rem] gap-12 px-5 py-16 sm:px-8 lg:grid-cols-12 lg:items-center lg:py-24">
-          <div className="space-y-7 lg:col-span-7">
+        <div className="mx-auto w-full max-w-[75rem] px-5 py-16 sm:px-8 lg:py-24">
+          <div className="max-w-3xl space-y-7">
             <Eyebrow>Sitios y panel para negocios</Eyebrow>
 
             <h1 className="text-[2.5rem] leading-[1.02] tracking-[-0.03em] font-semibold text-balance text-ink sm:text-[3.5rem]">
@@ -79,15 +79,12 @@ export default function LandingPage() {
                   Pedir presupuesto <ArrowRight />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/trabajos">Ver trabajos</Link>
-              </Button>
+              {featured.length > 0 ? (
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/trabajos">Ver trabajos</Link>
+                </Button>
+              ) : null}
             </div>
-
-          </div>
-
-          <div className="lg:col-span-5">
-            <PanelPreview />
           </div>
         </div>
       </section>
@@ -118,57 +115,70 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-[75rem] px-5 py-16 sm:px-8 lg:py-20">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="max-w-2xl space-y-3">
-            <Eyebrow>Trabajos</Eyebrow>
-            <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
-              Negocios que ya lo están usando.
-            </h2>
+      {/* Casos reales. Mientras content/works.ts esté vacío la sección no se muestra:
+          mejor no tenerla que inventar clientes. */}
+      {featured.length > 0 ? (
+        <section className="mx-auto w-full max-w-[75rem] px-5 py-16 sm:px-8 lg:py-20">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="max-w-2xl space-y-3">
+              <Eyebrow>Trabajos</Eyebrow>
+              <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
+                Negocios que ya lo están usando.
+              </h2>
+            </div>
+            <Button asChild variant="ghost">
+              <Link href="/trabajos">
+                Ver todos <ArrowRight className="transition-transform duration-[120ms] group-hover/button:translate-x-0.5" />
+              </Link>
+            </Button>
           </div>
-          <Button asChild variant="ghost">
-            <Link href="/trabajos">
-              Ver todos <ArrowRight className="transition-transform duration-[120ms] group-hover/button:translate-x-0.5" />
-            </Link>
-          </Button>
-        </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {featured.map((work) => (
-            <Link
-              key={work.slug}
-              href={`/trabajos/${work.slug}`}
-              className="group flex flex-col overflow-hidden rounded-md border border-n-200 bg-surface"
-            >
-              <div className="flex aspect-[4/3] w-full items-center justify-center bg-paper-2 px-4">
-                <VerticalIllustration vertical={work.vertical} />
-              </div>
-              <div className="flex-1 space-y-2 p-5">
-                <div className="flex items-center gap-2 text-xs text-ink-4">
-                  <span>{verticalLabel(work.vertical)}</span>
-                  <span aria-hidden="true">·</span>
-                  <span>{work.city}</span>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {featured.map((work) => (
+              <Link
+                key={work.slug}
+                href={`/trabajos/${work.slug}`}
+                className="group flex flex-col overflow-hidden rounded-md border border-n-200 bg-surface"
+              >
+                <div className="flex aspect-[4/3] w-full items-center justify-center bg-paper-2 px-4">
+                  <VerticalIllustration vertical={work.vertical} />
                 </div>
-                <h3 className="font-medium text-ink group-hover:text-brand">{work.name}</h3>
-                <p className="text-[0.9375rem] text-ink-3 text-pretty">{work.tagline}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+                <div className="flex-1 space-y-2 p-5">
+                  <div className="flex items-center gap-2 text-xs text-ink-4">
+                    <span>{verticalLabel(work.vertical)}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{work.city}</span>
+                  </div>
+                  <h3 className="font-medium text-ink group-hover:text-brand">{work.name}</h3>
+                  <p className="text-[0.9375rem] text-ink-3 text-pretty">{work.tagline}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section id="precios" className="scroll-mt-20 border-t border-n-200 bg-paper-2">
         <div className="mx-auto w-full max-w-[75rem] px-5 py-12 sm:px-8 lg:py-14">
-          <div className="max-w-2xl space-y-2">
+          <div className="max-w-2xl space-y-3">
             <Eyebrow>Precios</Eyebrow>
-            <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
-              Armá tu presupuesto.
+            <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink sm:text-[2.5rem]">
+              Precios claros, desde US$&nbsp;60.
             </h2>
             <p className="text-[1.0625rem] leading-[1.55] text-ink-2 text-pretty">
-              Cada proyecto es distinto, así que no hay packs cerrados. Elegí lo que necesitás y te llevás un rango
-              claro para arrancar la conversación.
+              Sin packs cerrados ni letra chica. Elegí lo que tu negocio necesita y mirá al instante cuánto cuesta el
+              alta y el abono mensual.
             </p>
           </div>
+
+          <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[0.875rem] text-ink-2">
+            {['Pago único de alta', 'Abono mensual', 'Sin compromiso', 'Respuesta en el día hábil'].map((item) => (
+              <li key={item} className="flex items-center gap-2">
+                <Check className="size-4 text-brand" />
+                {item}
+              </li>
+            ))}
+          </ul>
 
           <div className="mt-5">
             <PricingBuilder />

@@ -1,4 +1,4 @@
-import { Check, Plus } from 'lucide-react'
+import { Check, ChevronDown, Plus } from 'lucide-react'
 
 const included = [
   'Que el sitio siga online',
@@ -21,17 +21,20 @@ const separate = [
 
 export function MaintenanceBlock() {
   return (
-    <div className="rounded-md border border-n-200 bg-surface p-5 sm:p-6">
-      <div className="md:flex md:items-start md:justify-between md:gap-6">
-        <div className="md:max-w-xs">
+    <details className="group rounded-md border border-n-200 bg-surface">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 sm:px-6 [&::-webkit-details-marker]:hidden">
+        <div>
           <h3 className="text-lg font-medium text-ink">Mantenimiento: qué incluye y qué no</h3>
-          <p className="mt-1.5 text-[0.9375rem] leading-[1.4] text-ink-2 text-pretty">
-            Mantener es reparar y sostener lo que ya está funcionando. No es agregar cosas nuevas.
+          <p className="mt-1 text-[0.9375rem] text-ink-3 text-pretty">
+            Mantener es sostener lo que ya funciona, no agregar cosas nuevas.
           </p>
         </div>
+        <ChevronDown className="size-5 shrink-0 text-ink-3 transition-transform duration-200 group-open:rotate-180" />
+      </summary>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 md:mt-0 md:gap-6">
-          <div className="space-y-1.5">
+      <div className="border-t border-n-200 p-5 sm:px-6">
+        <div className="grid gap-5 sm:grid-cols-2 sm:gap-8">
+          <div className="space-y-2">
             <p className="text-[0.8125rem] font-medium text-ok">Sí está incluido</p>
             <ul className="space-y-1.5 text-[0.875rem]">
               {included.map((item) => (
@@ -43,7 +46,7 @@ export function MaintenanceBlock() {
             </ul>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <p className="text-[0.8125rem] font-medium text-ink-3">Se cotiza aparte</p>
             <ul className="space-y-1.5 text-[0.875rem]">
               {separate.map((item) => (
@@ -55,12 +58,12 @@ export function MaintenanceBlock() {
             </ul>
           </div>
         </div>
-      </div>
 
-      <p className="mt-4 border-t border-n-200 pt-3 text-[0.8125rem] text-ink-3 text-pretty">
-        Si querés sumar algo nuevo, te pasamos el presupuesto antes de hacerlo. Nunca te vamos a facturar algo que no
-        aprobaste.
-      </p>
-    </div>
+        <p className="mt-5 border-t border-n-200 pt-3 text-[0.8125rem] text-ink-3 text-pretty">
+          Si querés sumar algo nuevo, te pasamos el presupuesto antes de hacerlo. Nunca te vamos a facturar algo que no
+          aprobaste.
+        </p>
+      </div>
+    </details>
   )
 }
