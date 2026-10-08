@@ -7,9 +7,16 @@ export const metadata: Metadata = {
   description: 'Contanos qué necesita tu negocio y te respondemos en el día con una propuesta concreta.',
 }
 
+// [[PENDIENTE: WHATSAPP]] — número comercial en formato internacional sin signos
+// (ej. 5492235551234). Mientras sea null el canal no se muestra, así no queda
+// un placeholder a la vista.
+const WHATSAPP_NUMBER: string | null = null
+
 const channels = [
   { icon: Mail, label: 'contacto@zetro.app', hint: 'Respondemos en el día hábil' },
-  { icon: MessageCircle, label: 'WhatsApp [[PENDIENTE: WHATSAPP]]', hint: 'Lunes a viernes, 9 a 19' },
+  ...(WHATSAPP_NUMBER
+    ? [{ icon: MessageCircle, label: `WhatsApp ${WHATSAPP_NUMBER}`, hint: 'Lunes a viernes, 9 a 19' }]
+    : []),
   { icon: Clock, label: 'Primera charla: 30 minutos', hint: 'Sin costo y sin compromiso' },
 ]
 
