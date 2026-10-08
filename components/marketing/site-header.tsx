@@ -6,9 +6,11 @@ import { Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Logo } from '@/components/marketing/logo'
+import { works } from '@/content/works'
 
+// "Trabajos" aparece recién cuando hay casos cargados: hasta entonces la página está vacía y es un callejón sin salida.
 const links = [
-  { href: '/trabajos', label: 'Trabajos' },
+  ...(works.length > 0 ? [{ href: '/trabajos', label: 'Trabajos' }] : []),
   { href: '/#como-funciona', label: 'Cómo funciona' },
   { href: '/#precios', label: 'Precios' },
   { href: '/contacto', label: 'Contacto' },
@@ -41,8 +43,8 @@ export function SiteHeader() {
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link href="/login">Entrar</Link>
           </Button>
-          <Button asChild size="sm">
-            <Link href="/contacto">Pedir presupuesto</Link>
+          <Button asChild size="sm" className="h-10 px-3.5 sm:h-8 sm:px-3">
+            <Link href="/#precios">Armá tu presupuesto</Link>
           </Button>
 
           <Sheet open={open} onOpenChange={setOpen}>

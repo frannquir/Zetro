@@ -76,6 +76,45 @@ function ClockIcon() {
   )
 }
 
+/**
+ * Esquema del producto para la tarjeta principal: el sitio en una ventana y el panel en un celular.
+ * Son bloques y líneas, sin datos: muestra la forma, no inventa números ni clientes.
+ */
+function ProductSketch() {
+  return (
+    <svg viewBox="0 0 360 150" className="w-full max-w-md text-n-300" aria-hidden="true">
+      <rect x="1" y="6" width="250" height="140" rx="6" fill="var(--paper-2)" stroke="currentColor" />
+      <path d="M1 26h250" stroke="currentColor" />
+      <circle cx="13" cy="16" r="2.5" fill="currentColor" />
+      <circle cx="22" cy="16" r="2.5" fill="currentColor" />
+      <circle cx="31" cy="16" r="2.5" fill="currentColor" />
+      <rect x="18" y="42" width="120" height="10" rx="2" fill="var(--ink)" opacity="0.8" />
+      <rect x="18" y="58" width="90" height="6" rx="2" fill="currentColor" />
+      <rect x="18" y="70" width="104" height="6" rx="2" fill="currentColor" />
+      <rect x="18" y="86" width="56" height="16" rx="3" fill="var(--brand)" />
+      <rect x="152" y="42" width="82" height="60" rx="4" fill="var(--surface)" stroke="currentColor" />
+      <rect x="18" y="116" width="216" height="16" rx="3" fill="var(--surface)" stroke="currentColor" />
+
+      <rect x="272" y="1" width="86" height="148" rx="12" fill="var(--surface)" stroke="currentColor" />
+      <rect x="284" y="18" width="40" height="6" rx="2" fill="var(--ink)" opacity="0.8" />
+      {[34, 56, 78, 100].map((y, i) => (
+        <g key={y}>
+          <rect x="284" y={y} width="62" height="16" rx="3" fill={i === 1 ? 'var(--brand-soft)' : 'var(--paper-2)'} />
+          <rect
+            x="289"
+            y={y + 5}
+            width={i === 1 ? 30 : 22}
+            height="6"
+            rx="2"
+            fill={i === 1 ? 'var(--brand)' : 'currentColor'}
+          />
+        </g>
+      ))}
+      <rect x="302" y="132" width="26" height="4" rx="2" fill="currentColor" />
+    </svg>
+  )
+}
+
 const features: Feature[] = [
   {
     span: 'lead',
@@ -110,8 +149,8 @@ const features: Feature[] = [
   {
     span: 'small',
     icon: <ClockIcon />,
-    title: 'Listo en dos semanas',
-    body: 'Charla, propuesta, sitio en línea. Sin vueltas de por medio.',
+    title: 'En línea en unas dos semanas',
+    body: 'Es lo habitual. Si tu proyecto es más grande, te damos el plazo en la propuesta.',
   },
 ]
 
@@ -149,7 +188,7 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
   return (
     <div
       ref={ref}
-      className={`group relative flex flex-col gap-3 rounded-md border border-n-200 bg-surface p-6 transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-1 hover:border-brand/40 hover:shadow-overlay focus-within:-translate-y-1 focus-within:border-brand/40 focus-within:shadow-overlay ${feature.span === 'lead' ? 'justify-center' : ''} ${spanClass[feature.span]}`}
+      className={`relative flex flex-col gap-3 rounded-md border border-n-200 bg-surface p-6 ${feature.span === 'lead' ? 'lg:justify-end' : ''} ${spanClass[feature.span]}`}
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(16px)',
@@ -159,9 +198,12 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
         transitionDelay: `${Math.min(index, 7) * 60}ms`,
       }}
     >
-      <span className="w-fit origin-left text-brand transition-transform duration-200 ease-out delay-[40ms] group-hover:scale-[1.08]">
-        {feature.icon}
-      </span>
+      {feature.span === 'lead' ? (
+        <div className="mb-auto hidden pb-6 lg:block">
+          <ProductSketch />
+        </div>
+      ) : null}
+      <span className="w-fit text-brand">{feature.icon}</span>
       <h3
         className={
           feature.span === 'lead' ? 'text-xl font-semibold tracking-[-0.01em] text-ink' : 'font-medium text-ink'
