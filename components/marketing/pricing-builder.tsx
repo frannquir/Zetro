@@ -399,9 +399,9 @@ export function PricingBuilder() {
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-px overflow-hidden rounded-md border border-n-200 bg-n-200 lg:grid-cols-12">
+      <div className="grid items-start gap-3 lg:grid-cols-12">
         {/* Izquierda — una sola lista: sitio base fijo + agregados, con las columnas de precio alineadas */}
-        <div className="bg-surface lg:col-span-8">
+        <div className="overflow-hidden rounded-md border border-n-200 bg-surface lg:col-span-8">
           <div className="flex items-end justify-between gap-4 border-b border-n-200 px-5 py-4 sm:px-6">
             <div>
               <p className="text-xs leading-none tracking-[0.06em] uppercase font-medium text-ink-4">Paso 1</p>
@@ -523,8 +523,8 @@ export function PricingBuilder() {
         </div>
 
         {/* Derecha — resumen y totales. Oscuro para que sea el punto focal y lleve el CTA. */}
-        <div className="bg-ink p-5 text-paper sm:p-6 lg:col-span-4">
-          <div className="flex flex-col lg:sticky lg:top-24">
+        <div className="rounded-md bg-ink p-5 text-paper sm:p-6 lg:sticky lg:top-24 lg:col-span-4">
+          <div className="flex flex-col">
             <p className="text-xs leading-none tracking-[0.06em] uppercase font-medium text-paper/50">Tu presupuesto</p>
 
             <div aria-live="polite" className="mt-4">
@@ -580,7 +580,7 @@ export function PricingBuilder() {
 
         {/* Pedido del presupuesto exacto — fila a ancho completo dentro de la misma tarjeta,
             para que el total y el pedido se lean como un solo paso. */}
-        <div id={`${formId}-request`} className="scroll-mt-28 bg-surface p-5 sm:p-6 lg:col-span-12">
+        <div id={`${formId}-request`} className="scroll-mt-28 rounded-md border border-n-200 bg-surface p-5 sm:p-6 lg:col-span-12">
           {sent ? (
             <Alert className="border-l-ok">
               <CircleCheckBig className="text-ok" />
