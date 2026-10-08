@@ -577,99 +577,95 @@ export function PricingBuilder() {
             </p>
           </div>
         </div>
+      </div>
 
-        {/* Pedido del presupuesto exacto — fila a ancho completo dentro de la misma tarjeta,
-            para que el total y el pedido se lean como un solo paso. */}
-        <div id={`${formId}-request`} className="scroll-mt-28 rounded-md border border-n-200 bg-surface p-5 sm:p-6 lg:col-span-12">
-          {sent ? (
-            <Alert className="border-l-ok">
-              <CircleCheckBig className="text-ok" />
-              <AlertTitle>Nos llegó tu pedido</AlertTitle>
-              <AlertDescription>Te mandamos una copia por mail y te respondemos en el día hábil.</AlertDescription>
-            </Alert>
-          ) : (
-            <form onSubmit={onSubmit} noValidate className="space-y-4">
-              <div>
-                <p className="text-xs leading-none tracking-[0.06em] uppercase font-medium text-ink-4">Paso 2</p>
-                <h3 className="mt-2 text-lg font-medium text-ink">Recibí el presupuesto exacto</h3>
-                <p className="mt-1 text-[0.9375rem] text-ink-3">
-                  Dejanos tus datos y te lo mandamos con esta configuración. Te respondemos en el día hábil.
-                </p>
-              </div>
+      {/* Pedido del presupuesto exacto — fuera de la grilla, así el resumen pegado se suelta al terminar la lista
+          y nunca tapa el formulario. */}
+      <div id={`${formId}-request`} className="scroll-mt-28 rounded-md border border-n-200 bg-surface p-5 sm:p-6">
+        {sent ? (
+          <Alert className="border-l-ok">
+            <CircleCheckBig className="text-ok" />
+            <AlertTitle>Nos llegó tu pedido</AlertTitle>
+            <AlertDescription>Te mandamos una copia por mail y te respondemos en el día hábil.</AlertDescription>
+          </Alert>
+        ) : (
+          <form onSubmit={onSubmit} noValidate className="space-y-4">
+            <div>
+              <p className="text-xs leading-none tracking-[0.06em] uppercase font-medium text-ink-4">Paso 2</p>
+              <h3 className="mt-2 text-lg font-medium text-ink">Recibí el presupuesto exacto</h3>
+              <p className="mt-1 text-[0.9375rem] text-ink-3">
+                Dejanos tus datos y te lo mandamos con esta configuración. Te respondemos en el día hábil.
+              </p>
+            </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
-                <ContactField id={`${formId}-name`} label="Nombre" error={errors.name}>
-                  <Input
-                    id={`${formId}-name`}
-                    name="name"
-                    autoComplete="name"
-                    placeholder="Camila Duarte"
-                    aria-invalid={!!errors.name}
-                  />
-                </ContactField>
-                <ContactField id={`${formId}-email`} label="Email" error={errors.email}>
-                  <Input
-                    id={`${formId}-email`}
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="camila@barchelo.com.ar"
-                    aria-invalid={!!errors.email}
-                  />
-                </ContactField>
-                <ContactField id={`${formId}-phone`} label="WhatsApp (opcional)" error={errors.phone}>
-                  <Input
-                    id={`${formId}-phone`}
-                    name="phone"
-                    autoComplete="tel"
-                    placeholder="11 5566 7788"
-                    aria-invalid={!!errors.phone}
-                  />
-                </ContactField>
-              </div>
-
-              <ContactField
-                id={`${formId}-message`}
-                label="Algo que quieras contarnos (opcional)"
-                error={errors.message}
-              >
-                <Textarea
-                  id={`${formId}-message`}
-                  name="message"
-                  rows={3}
-                  placeholder="Tenemos dos locales y queremos reservas en los dos."
+            <div className="grid gap-4 sm:grid-cols-3">
+              <ContactField id={`${formId}-name`} label="Nombre" error={errors.name}>
+                <Input
+                  id={`${formId}-name`}
+                  name="name"
+                  autoComplete="name"
+                  placeholder="Camila Duarte"
+                  aria-invalid={!!errors.name}
                 />
               </ContactField>
-
-              <div className="absolute h-px w-px overflow-hidden" style={{ clip: 'rect(0,0,0,0)' }} aria-hidden="true">
-                <label htmlFor={`${formId}-company_website`}>No completar este campo</label>
-                <input
-                  id={`${formId}-company_website`}
-                  name="company_website"
-                  type="text"
-                  tabIndex={-1}
-                  autoComplete="off"
+              <ContactField id={`${formId}-email`} label="Email" error={errors.email}>
+                <Input
+                  id={`${formId}-email`}
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="camila@barchelo.com.ar"
+                  aria-invalid={!!errors.email}
                 />
-              </div>
+              </ContactField>
+              <ContactField id={`${formId}-phone`} label="WhatsApp (opcional)" error={errors.phone}>
+                <Input
+                  id={`${formId}-phone`}
+                  name="phone"
+                  autoComplete="tel"
+                  placeholder="11 5566 7788"
+                  aria-invalid={!!errors.phone}
+                />
+              </ContactField>
+            </div>
 
-              {failure ? <p className="text-[0.9375rem] text-err">{failure}</p> : null}
+            <ContactField id={`${formId}-message`} label="Algo que quieras contarnos (opcional)" error={errors.message}>
+              <Textarea
+                id={`${formId}-message`}
+                name="message"
+                rows={3}
+                placeholder="Tenemos dos locales y queremos reservas en los dos."
+              />
+            </ContactField>
 
-              <div className="flex flex-wrap gap-2">
-                <Button type="submit" size="lg" disabled={pending}>
-                  {pending ? <Loader2 className="animate-spin" /> : null}
-                  Pedir presupuesto exacto
+            <div className="absolute h-px w-px overflow-hidden" style={{ clip: 'rect(0,0,0,0)' }} aria-hidden="true">
+              <label htmlFor={`${formId}-company_website`}>No completar este campo</label>
+              <input
+                id={`${formId}-company_website`}
+                name="company_website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
+
+            {failure ? <p className="text-[0.9375rem] text-err">{failure}</p> : null}
+
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" size="lg" disabled={pending}>
+                {pending ? <Loader2 className="animate-spin" /> : null}
+                Pedir presupuesto exacto
+              </Button>
+              {whatsappHref ? (
+                <Button asChild variant="outline" size="lg">
+                  <a href={whatsappHref} target="_blank" rel="noreferrer">
+                    Por WhatsApp
+                  </a>
                 </Button>
-                {whatsappHref ? (
-                  <Button asChild variant="outline" size="lg">
-                    <a href={whatsappHref} target="_blank" rel="noreferrer">
-                      Por WhatsApp
-                    </a>
-                  </Button>
-                ) : null}
-              </div>
-            </form>
-          )}
-        </div>
+              ) : null}
+            </div>
+          </form>
+        )}
       </div>
 
       {/* Proyecto completo — barra compacta, fuera del armador */}
