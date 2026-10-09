@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowRight, Check } from 'lucide-react'
+import { ArrowRight, Check, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { VerticalIllustration } from '@/components/marketing/vertical-illustration'
 import { FeaturesBento } from '@/components/marketing/features-bento'
@@ -9,6 +9,8 @@ import { PricingBuilder } from '@/components/marketing/pricing-builder'
 import { MaintenanceBlock } from '@/components/marketing/maintenance-block'
 import { works } from '@/content/works'
 import { verticalLabel } from '@/lib/labels'
+import { WhatsappLink } from '@/components/marketing/whatsapp-link'
+import { CONTACT_EMAIL } from '@/lib/contact'
 
 export const metadata: Metadata = {
   title: 'Zetro — sitios web y panel de gestión para negocios',
@@ -19,11 +21,11 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: '¿Cuánto tarda?',
-    a: 'Entre diez y quince días hábiles desde que tenemos el contenido. Si el contenido lo escribimos nosotros, sumá una semana.',
+    a: 'Depende del tamaño del proyecto, pero lo habitual son dos semanas desde que tenemos el contenido. Si es más grande, te damos el plazo en la propuesta.',
   },
   {
     q: '¿La mensualidad qué cubre?',
-    a: 'El panel, el hosting, las actualizaciones y los cambios chicos. Si querés una sección nueva completa, eso se cotiza aparte.',
+    a: 'El hosting, que el sitio siga andando, las actualizaciones y los cambios chicos. El panel y cada módulo que sumes tienen su propio abono, que ves en el armador de presupuesto.',
   },
   {
     q: '¿El sitio es mío?',
@@ -35,7 +37,7 @@ const faqs = [
   },
   {
     q: '¿Sirve para mi rubro?',
-    a: 'Si tu negocio reserva algo en un horario, sirve. Hoy tenemos restaurantes, cafés, gimnasios, barberías y consultorios.',
+    a: 'Si tu negocio reserva algo en un horario, sirve. Está pensado para restaurantes, cafés, gimnasios, barberías y consultorios.',
   },
 ]
 
@@ -47,7 +49,7 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'ProfessionalService',
   name: 'Zetro',
-  email: 'contacto@zetro.app',
+  email: CONTACT_EMAIL,
   areaServed: 'Buenos Aires, Argentina',
   // url canónica: agregar cuando esté el dominio definitivo. Sin valor real no va
   // al JSON-LD: Google lee esto y un placeholder ahí es peor que la ausencia.
@@ -73,17 +75,24 @@ export default function LandingPage() {
               agenda, tu carta siempre al día y las estadísticas que importan.
             </p>
 
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link href="/contacto">
-                  Pedir presupuesto <ArrowRight />
-                </Link>
-              </Button>
-              {featured.length > 0 ? (
-                <Button asChild size="lg" variant="outline">
-                  <Link href="/trabajos">Ver trabajos</Link>
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-3">
+                <Button asChild size="lg">
+                  <Link href="#precios">
+                    Armá tu presupuesto <ArrowRight />
+                  </Link>
                 </Button>
-              ) : null}
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/contacto">Escribinos</Link>
+                </Button>
+              </div>
+              <p className="flex flex-wrap gap-x-2 gap-y-1 text-[0.875rem] text-ink-3">
+                <span>Desde US$&nbsp;60</span>
+                <span aria-hidden="true">·</span>
+                <span>Primera charla sin costo</span>
+                <span aria-hidden="true">·</span>
+                <span>Respondemos en el día hábil</span>
+              </p>
             </div>
           </div>
         </div>
@@ -111,6 +120,27 @@ export default function LandingPage() {
 
           <div className="mt-10">
             <HowItWorks />
+          </div>
+
+          <div className="mt-10 flex flex-col gap-5 rounded-md border border-n-200 bg-surface p-5 sm:p-6 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-1">
+              <p className="font-medium text-ink">Todo arranca con una charla de media hora.</p>
+              <p className="text-[0.9375rem] text-ink-3 text-pretty">
+                Sin costo y sin compromiso. Si querés, antes mirá cuánto saldría.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild>
+                <Link href="#precios">
+                  Armá tu presupuesto <ArrowRight />
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <WhatsappLink source="como-funciona">
+                  <MessageCircle /> WhatsApp
+                </WhatsappLink>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -211,14 +241,26 @@ export default function LandingPage() {
               ¿Arrancamos con el tuyo?
             </h2>
             <p className="max-w-lg text-[1.0625rem] leading-[1.55] text-paper/75 text-pretty">
-              Contanos qué necesitás y te respondemos en el día con una propuesta concreta.
+              Contanos qué necesitás y te respondemos en el día hábil con una propuesta concreta.
             </p>
           </div>
-          <Button asChild size="lg" variant="outline" className="border-paper/30 bg-transparent text-paper hover:bg-paper/10">
-            <Link href="/contacto">
-              Pedir presupuesto <ArrowRight />
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild size="lg" className="bg-paper text-ink hover:bg-paper/90">
+              <Link href="#precios">
+                Armá tu presupuesto <ArrowRight />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-paper/30 bg-transparent text-paper hover:bg-paper/10"
+            >
+              <WhatsappLink source="cierre">
+                <MessageCircle /> WhatsApp
+              </WhatsappLink>
+            </Button>
+          </div>
         </div>
       </section>
     </>

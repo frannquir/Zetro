@@ -32,7 +32,7 @@ const steps: Step[] = [
 // Un segmento por paso + uno final para el cierre con los cuatro juntos.
 const SEGMENTS = steps.length + 1
 // vh de scroll dedicados a cada segmento dentro del riel pegado
-const STEP_VH = 45
+const STEP_VH = 30
 
 function two(n: number) {
   return String(n).padStart(2, '0')

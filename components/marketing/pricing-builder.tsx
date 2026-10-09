@@ -1,15 +1,18 @@
 'use client'
 
-import { useId, useState, useSyncExternalStore } from 'react'
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Check, CircleCheckBig, Loader2, Minus, Plus } from 'lucide-react'
+import { ArrowRight, Check, Loader2, MessageCircle, Minus, Plus } from 'lucide-react'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { track } from '@vercel/analytics'
+import { LeadSuccess } from '@/components/marketing/lead-success'
+import { WhatsappLink } from '@/components/marketing/whatsapp-link'
 import { postJson } from '@/lib/api'
+import { useMediaQuery } from '@/lib/use-media-query'
 
 const contactSchema = z.object({
   name: z.string().trim().min(2, 'Poné tu nombre'),
@@ -19,8 +22,6 @@ const contactSchema = z.object({
 })
 
 type ContactErrors = Partial<Record<keyof z.infer<typeof contactSchema>, string>>
-// [[PENDIENTE: WHATSAPP]] — número de WhatsApp comercial en formato internacional sin signos (ej. 5492235551234)
-const WHATSAPP_NUMBER: string | null = null
 
 type Money = { min: number | null; max: number | null }
 
@@ -146,11 +147,10 @@ const PRICING: {
   ],
 }
 
+// Sin centavos: se muestra en dólares enteros. El redondeo se hace por ítem (en `scale`), antes de sumar,
+// así el total siempre coincide con la suma de las filas que ve la persona.
 function formatNumber(n: number) {
-  return n.toLocaleString('es-AR', {
-    minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
-    maximumFractionDigits: 2,
-  })
+  return Math.round(n).toLocaleString('es-AR', { maximumFractionDigits: 0 })
 }
 
 function formatAmount(n: number) {
@@ -177,8 +177,8 @@ function formatRange(range: Money): string | null {
 
 function scale(range: Money, qty: number): Money {
   return {
-    min: range.min === null ? null : range.min * qty,
-    max: range.max === null ? null : range.max * qty,
+    min: range.min === null ? null : Math.round(range.min) * qty,
+    max: range.max === null ? null : Math.round(range.max) * qty,
   }
 }
 
@@ -301,6 +301,10 @@ export function PricingBuilder() {
   const [errors, setErrors] = useState<ContactErrors>({})
   const [failure, setFailure] = useState<string | null>(null)
   const formId = useId()
+  const listRef = useRef<HTMLDivElement>(null)
+  const summaryRef = useRef<HTMLDivElement>(null)
+  const requestRef = useRef<HTMLDivElement>(null)
+  const showBar = useMobileTotalBar(listRef, summaryRef, requestRef)
 
   // se lee del store y no de `selection`: dos toggles en el mismo tick comparten
   // el valor del render y el segundo pisaría al primero.
@@ -321,8 +325,14 @@ export function PricingBuilder() {
 
   const activeAddons = PRICING.agregados.filter((a) => (selection[a.id] ?? 0) > 0)
 
-  const totalOnce = sumRange([PRICING.base.alta, ...activeAddons.map((a) => scale(a.alta, selection[a.id] ?? 1))])
-  const totalMonthly = sumRange([PRICING.base.abono, ...activeAddons.map((a) => scale(a.abono, selection[a.id] ?? 1))])
+  const totalOnce = sumRange([
+    scale(PRICING.base.alta, 1),
+    ...activeAddons.map((a) => scale(a.alta, selection[a.id] ?? 1)),
+  ])
+  const totalMonthly = sumRange([
+    scale(PRICING.base.abono, 1),
+    ...activeAddons.map((a) => scale(a.abono, selection[a.id] ?? 1)),
+  ])
   const totalOnceLabel = formatRange(totalOnce)
   const totalMonthlyLabel = formatRange(totalMonthly)
 
@@ -340,10 +350,6 @@ export function PricingBuilder() {
     `Alta estimada (pago único): ${rangeForEmail(totalOnce)}`,
     `Abono mensual estimado: ${rangeForEmail(totalMonthly)}`,
   ].join('\n')
-
-  const whatsappHref = WHATSAPP_NUMBER
-    ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(budgetBody)}`
-    : null
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -370,6 +376,8 @@ export function PricingBuilder() {
         if (!next[key]) next[key] = issue.message
       }
       setErrors(next)
+      const first = (['name', 'email', 'phone', 'message'] as const).find((key) => next[key])
+      if (first) document.getElementById(`${formId}-${first}`)?.focus()
       return
     }
 
@@ -390,8 +398,15 @@ export function PricingBuilder() {
     })
 
     setPending(false)
-    if (result.ok) setSent(true)
-    else setFailure(result.error.message)
+    if (result.ok) {
+      track('lead_submitted', { source: 'armador', addons: activeAddons.length })
+      setSent(true)
+    } else setFailure(result.error.message)
+  }
+
+  function scrollToRequest() {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    requestRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' })
   }
 
   const baseLabel = formatRange(PRICING.base.alta)
@@ -401,7 +416,7 @@ export function PricingBuilder() {
     <div className="space-y-3">
       <div className="grid items-start gap-3 lg:grid-cols-12">
         {/* Izquierda — una sola lista: sitio base fijo + agregados, con las columnas de precio alineadas */}
-        <div className="overflow-hidden rounded-md border border-n-200 bg-surface lg:col-span-8">
+        <div ref={listRef} className="overflow-hidden rounded-md border border-n-200 bg-surface lg:col-span-8">
           <div className="flex items-end justify-between gap-4 border-b border-n-200 px-5 py-4 sm:px-6">
             <div>
               <p className="text-xs leading-none tracking-[0.06em] uppercase font-medium text-ink-4">Paso 1</p>
@@ -446,9 +461,12 @@ export function PricingBuilder() {
               const newGroup = addon.grupo !== PRICING.agregados[index - 1]?.grupo
               const qty = selection[addon.id] ?? 1
               return (
-                <li key={addon.id}>
+                <li
+                  key={addon.id}
+                  className={`transition-colors duration-150 ${active ? 'bg-brand-soft/60' : 'has-[[role=checkbox]:hover]:bg-n-100/60'}`}
+                >
                   {newGroup ? (
-                    <p className="border-b border-n-200 bg-paper-2/60 px-5 py-2 text-[0.6875rem] leading-none tracking-[0.08em] uppercase font-medium text-ink-3 sm:px-6">
+                    <p className="border-b border-n-200 bg-paper-2 px-5 py-2 text-[0.6875rem] leading-none tracking-[0.08em] uppercase font-medium text-ink-3 sm:px-6">
                       {addon.grupo}
                     </p>
                   ) : null}
@@ -463,8 +481,8 @@ export function PricingBuilder() {
                         toggle(addon)
                       }
                     }}
-                    className={`flex cursor-pointer items-start gap-3 px-5 py-4 transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand sm:px-6 ${
-                      active ? 'bg-brand-soft/60' : 'hover:bg-n-100/60'
+                    className={`flex cursor-pointer items-start gap-3 px-5 pt-4 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand sm:px-6 ${
+                      addon.cantidad && active ? 'pb-2' : 'pb-4'
                     }`}
                   >
                     <span
@@ -481,37 +499,43 @@ export function PricingBuilder() {
                         <p className="mt-1 text-[0.8125rem] leading-[1.45] text-ink-3 text-pretty">
                           {addon.descripcion}
                         </p>
-                        {addon.cantidad && active ? (
-                          <div
-                            className="mt-2 flex w-fit items-center gap-1 rounded-sm border border-n-300 bg-surface px-1"
-                            onClick={(e) => e.stopPropagation()}
-                            onKeyDown={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              type="button"
-                              aria-label={`Restar ${addon.nombre}`}
-                              onClick={() => setCantidad(addon, qty - 1)}
-                              disabled={qty <= 1}
-                              className="flex size-7 items-center justify-center text-ink-2 disabled:opacity-40"
-                            >
-                              <Minus className="size-3.5" />
-                            </button>
-                            <span className="min-w-5 text-center text-sm tnum text-ink">{qty}</span>
-                            <button
-                              type="button"
-                              aria-label={`Sumar ${addon.nombre}`}
-                              onClick={() => setCantidad(addon, qty + 1)}
-                              disabled={qty >= (addon.maxCantidad ?? 5)}
-                              className="flex size-7 items-center justify-center text-ink-2 disabled:opacity-40"
-                            >
-                              <Plus className="size-3.5" />
-                            </button>
-                          </div>
-                        ) : null}
                       </div>
                       <Prices alta={formatRange(addon.alta)} abono={formatRange(addon.abono)} />
                     </div>
                   </div>
+                  {/* La cantidad va fuera del checkbox: un control dentro de otro no se puede usar bien con teclado
+                      ni con lector de pantalla. Se alinea con el texto (padding + casilla + gap). */}
+                  {addon.cantidad && active ? (
+                    <div className="pr-5 pb-4 pl-[3.25rem] sm:pr-6 sm:pl-[3.5rem]">
+                      <div
+                        role="group"
+                        aria-label={`Cantidad de ${addon.nombre}`}
+                        className="flex w-fit items-center gap-1 rounded-sm border border-n-300 bg-surface px-1"
+                      >
+                        <button
+                          type="button"
+                          aria-label={`Restar ${addon.nombre}`}
+                          onClick={() => setCantidad(addon, qty - 1)}
+                          disabled={qty <= 1}
+                          className="flex size-9 items-center justify-center text-ink-2 disabled:opacity-40"
+                        >
+                          <Minus className="size-3.5" />
+                        </button>
+                        <span aria-live="polite" className="min-w-5 text-center text-sm tnum text-ink">
+                          {qty}
+                        </span>
+                        <button
+                          type="button"
+                          aria-label={`Sumar ${addon.nombre}`}
+                          onClick={() => setCantidad(addon, qty + 1)}
+                          disabled={qty >= (addon.maxCantidad ?? 5)}
+                          className="flex size-9 items-center justify-center text-ink-2 disabled:opacity-40"
+                        >
+                          <Plus className="size-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
                 </li>
               )
             })}
@@ -523,7 +547,7 @@ export function PricingBuilder() {
         </div>
 
         {/* Derecha — resumen y totales. Oscuro para que sea el punto focal y lleve el CTA. */}
-        <div className="rounded-md bg-ink p-5 text-paper sm:p-6 lg:sticky lg:top-24 lg:col-span-4">
+        <div ref={summaryRef} className="rounded-md bg-ink p-5 text-paper sm:p-6 lg:sticky lg:top-24 lg:col-span-4">
           <div className="flex flex-col">
             <p className="text-xs leading-none tracking-[0.06em] uppercase font-medium text-paper/50">Tu presupuesto</p>
 
@@ -565,9 +589,7 @@ export function PricingBuilder() {
             <Button
               size="lg"
               className="mt-6 w-full bg-paper text-ink hover:bg-paper/90"
-              onClick={() =>
-                document.getElementById(`${formId}-request`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-              }
+              onClick={() => scrollToRequest()}
             >
               Pedir presupuesto exacto
               <ArrowRight />
@@ -581,13 +603,13 @@ export function PricingBuilder() {
 
       {/* Pedido del presupuesto exacto — fuera de la grilla, así el resumen pegado se suelta al terminar la lista
           y nunca tapa el formulario. */}
-      <div id={`${formId}-request`} className="scroll-mt-28 rounded-md border border-n-200 bg-surface p-5 sm:p-6">
+      <div
+        ref={requestRef}
+        id={`${formId}-request`}
+        className="scroll-mt-28 rounded-md border border-n-200 bg-surface p-5 sm:p-6"
+      >
         {sent ? (
-          <Alert className="border-l-ok">
-            <CircleCheckBig className="text-ok" />
-            <AlertTitle>Nos llegó tu pedido</AlertTitle>
-            <AlertDescription>Te mandamos una copia por mail y te respondemos en el día hábil.</AlertDescription>
-          </Alert>
+          <LeadSuccess title="Nos llegó tu pedido" source="armador" />
         ) : (
           <form onSubmit={onSubmit} noValidate className="space-y-4">
             <div>
@@ -606,6 +628,7 @@ export function PricingBuilder() {
                   autoComplete="name"
                   placeholder="Camila Duarte"
                   aria-invalid={!!errors.name}
+                  aria-describedby={errors.name ? `${formId}-name-error` : undefined}
                 />
               </ContactField>
               <ContactField id={`${formId}-email`} label="Email" error={errors.email}>
@@ -616,15 +639,19 @@ export function PricingBuilder() {
                   autoComplete="email"
                   placeholder="camila@barchelo.com.ar"
                   aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? `${formId}-email-error` : undefined}
                 />
               </ContactField>
               <ContactField id={`${formId}-phone`} label="WhatsApp (opcional)" error={errors.phone}>
                 <Input
                   id={`${formId}-phone`}
                   name="phone"
+                  type="tel"
+                  inputMode="tel"
                   autoComplete="tel"
                   placeholder="11 5566 7788"
                   aria-invalid={!!errors.phone}
+                  aria-describedby={errors.phone ? `${formId}-phone-error` : undefined}
                 />
               </ContactField>
             </div>
@@ -649,20 +676,22 @@ export function PricingBuilder() {
               />
             </div>
 
-            {failure ? <p className="text-[0.9375rem] text-err">{failure}</p> : null}
+            {failure ? (
+              <p role="alert" className="text-[0.9375rem] text-err">
+                {failure}
+              </p>
+            ) : null}
 
             <div className="flex flex-wrap gap-2">
               <Button type="submit" size="lg" disabled={pending}>
                 {pending ? <Loader2 className="animate-spin" /> : null}
                 Pedir presupuesto exacto
               </Button>
-              {whatsappHref ? (
-                <Button asChild variant="outline" size="lg">
-                  <a href={whatsappHref} target="_blank" rel="noreferrer">
-                    Por WhatsApp
-                  </a>
-                </Button>
-              ) : null}
+              <Button asChild variant="outline" size="lg">
+                <WhatsappLink source="armador" text={budgetBody}>
+                  <MessageCircle /> Mandalo por WhatsApp
+                </WhatsappLink>
+              </Button>
             </div>
           </form>
         )}
@@ -689,8 +718,78 @@ export function PricingBuilder() {
           </Button>
         </div>
       </div>
+
+      {/* Barra con el total, solo en pantallas chicas: ahí el resumen queda muy abajo de la lista y se elige a ciegas */}
+      <div
+        aria-hidden={!showBar}
+        inert={!showBar}
+        className={`fixed inset-x-0 bottom-0 z-30 border-t border-paper/10 bg-ink px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-paper shadow-overlay transition-transform duration-200 ease-out motion-reduce:transition-none lg:hidden ${
+          showBar ? 'translate-y-0' : 'translate-y-full'
+        }`}
+      >
+        <div className="mx-auto flex max-w-[75rem] items-center justify-between gap-4">
+          <dl className="min-w-0 space-y-0.5">
+            <div className="flex items-baseline gap-1.5">
+              <dt className="text-[0.75rem] text-paper/60">Alta</dt>
+              <dd className="truncate text-[1.0625rem] font-semibold tnum">{totalOnceLabel}</dd>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <dt className="text-[0.75rem] text-paper/60">Por mes</dt>
+              <dd className="truncate text-[0.875rem] tnum text-paper/85">{totalMonthlyLabel}</dd>
+            </div>
+          </dl>
+          <Button size="lg" className="shrink-0 bg-paper text-ink hover:bg-paper/90" onClick={scrollToRequest}>
+            Pedir <ArrowRight />
+          </Button>
+        </div>
+      </div>
     </div>
   )
+}
+
+/**
+ * La barra aparece mientras la lista de agregados está en pantalla y se va cuando ya se ven el resumen o el
+ * formulario (ahí sobra). Marca <html data-pricing-bar> para que el botón flotante de WhatsApp se corra.
+ */
+function useMobileTotalBar(
+  listRef: React.RefObject<HTMLElement | null>,
+  summaryRef: React.RefObject<HTMLElement | null>,
+  requestRef: React.RefObject<HTMLElement | null>,
+) {
+  const [visible, setVisible] = useState({ list: false, summary: false, request: false })
+
+  useEffect(() => {
+    const targets = [
+      ['list', listRef.current],
+      ['summary', summaryRef.current],
+      ['request', requestRef.current],
+    ] as const
+    const observer = new IntersectionObserver((entries) => {
+      setVisible((prev) => {
+        const next = { ...prev }
+        for (const entry of entries) {
+          const key = targets.find(([, node]) => node === entry.target)?.[0]
+          if (key) next[key] = entry.isIntersecting
+        }
+        return next
+      })
+    })
+    for (const [, node] of targets) if (node) observer.observe(node)
+    return () => observer.disconnect()
+  }, [listRef, summaryRef, requestRef])
+
+  const isSmall = useMediaQuery('(max-width: 1023px)')
+  const show = isSmall && visible.list && !visible.summary && !visible.request
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.dataset.pricingBar = show ? 'on' : 'off'
+    return () => {
+      delete root.dataset.pricingBar
+    }
+  }, [show])
+
+  return show
 }
 
 function ContactField({
@@ -708,7 +807,11 @@ function ContactField({
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
       {children}
-      {error ? <p className="text-xs text-err">{error}</p> : null}
+      {error ? (
+        <p id={`${id}-error`} className="text-xs text-err">
+          {error}
+        </p>
+      ) : null}
     </div>
   )
 }
