@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { ArrowRight } from 'lucide-react'
+import Image from 'next/image'
 import { VerticalIllustration } from '@/components/marketing/vertical-illustration'
 import { Button } from '@/components/ui/button'
 import { works } from '@/content/works'
-import { verticalLabel } from '@/lib/labels'
 
 export const metadata: Metadata = {
   title: 'Trabajos — Zetro',
@@ -36,12 +36,24 @@ export default function TrabajosPage() {
               href={`/trabajos/${work.slug}`}
               className="group flex flex-col overflow-hidden rounded-md border border-n-200 bg-surface"
             >
-              <div className="flex aspect-[4/3] w-full items-center justify-center bg-paper-2 px-4">
-                <VerticalIllustration vertical={work.vertical} />
-              </div>
+              {work.image ? (
+                <div className="relative aspect-[16/10] w-full border-b border-n-200 bg-paper-2">
+                  <Image
+                    src={work.image.src}
+                    alt={work.image.alt}
+                    fill
+                    sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
+                    className="object-cover object-top"
+                  />
+                </div>
+              ) : (
+                <div className="flex aspect-[16/10] w-full items-center justify-center border-b border-n-200 bg-paper-2 px-4">
+                  <VerticalIllustration vertical={work.vertical} />
+                </div>
+              )}
               <div className="flex flex-1 flex-col gap-2 p-5">
                 <div className="flex items-center gap-2 text-xs text-ink-4">
-                  <span>{verticalLabel(work.vertical)}</span>
+                  <span>{work.category}</span>
                   <span aria-hidden="true">·</span>
                   <span>{work.city}</span>
                   <span aria-hidden="true">·</span>

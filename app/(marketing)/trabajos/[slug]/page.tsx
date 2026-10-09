@@ -4,8 +4,8 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { VerticalIllustration } from '@/components/marketing/vertical-illustration'
+import { SiteShot } from '@/components/marketing/site-shot'
 import { works, workBySlug } from '@/content/works'
-import { verticalLabel } from '@/lib/labels'
 
 export function generateStaticParams() {
   return works.map((work) => ({ slug: work.slug }))
@@ -33,7 +33,7 @@ export default async function TrabajoPage({ params }: PageProps<'/trabajos/[slug
             <ArrowLeft className="size-4" /> Trabajos
           </Link>
           <div className="flex items-center gap-2 text-[0.9375rem] text-ink-3">
-            <span>{verticalLabel(work.vertical)}</span>
+            <span>{work.category}</span>
             <span aria-hidden="true">·</span>
             <span>{work.city}</span>
             <span aria-hidden="true">·</span>
@@ -51,9 +51,23 @@ export default async function TrabajoPage({ params }: PageProps<'/trabajos/[slug
         </div>
       </header>
 
-      <div className="flex aspect-[16/6] w-full items-center justify-center bg-paper-2">
-        <VerticalIllustration vertical={work.vertical} className="[&_svg]:size-24" />
-      </div>
+      {work.image && work.url ? (
+        <div className="bg-paper-2">
+          <div className="mx-auto w-full max-w-[60rem] px-5 py-10 sm:px-8 lg:py-14">
+            <SiteShot
+              src={work.image.src}
+              alt={work.image.alt}
+              url={work.url}
+              sizes="(min-width: 960px) 896px, 100vw"
+              priority
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="flex aspect-[16/6] w-full items-center justify-center bg-paper-2">
+          <VerticalIllustration vertical={work.vertical} className="[&_svg]:size-24" />
+        </div>
+      )}
 
       <div className="mx-auto w-full max-w-[45rem] space-y-12 px-5 py-14 sm:px-8">
         <dl className="grid gap-4 sm:grid-cols-3">
@@ -95,24 +109,40 @@ export default async function TrabajoPage({ params }: PageProps<'/trabajos/[slug
         ) : null}
       </div>
 
-      <section className="border-t border-n-200 bg-paper-2">
-        <div className="mx-auto w-full max-w-[75rem] px-5 py-14 sm:px-8">
-          <h2 className="text-xl leading-tight tracking-[-0.015em] font-semibold text-ink">Otros trabajos</h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            {others.map((other) => (
-              <Link
-                key={other.slug}
-                href={`/trabajos/${other.slug}`}
-                className="group rounded-md border border-n-200 bg-surface p-5"
-              >
-                <p className="text-xs text-ink-4">{verticalLabel(other.vertical)}</p>
-                <p className="mt-1 font-medium text-ink group-hover:text-brand">{other.name}</p>
-                <p className="mt-1 text-[0.9375rem] text-ink-3 text-pretty">{other.tagline}</p>
-              </Link>
-            ))}
+      {others.length > 0 ? (
+        <section className="border-t border-n-200 bg-paper-2">
+          <div className="mx-auto w-full max-w-[75rem] px-5 py-14 sm:px-8">
+            <h2 className="text-xl leading-tight tracking-[-0.015em] font-semibold text-ink">Otros trabajos</h2>
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              {others.map((other) => (
+                <Link
+                  key={other.slug}
+                  href={`/trabajos/${other.slug}`}
+                  className="group rounded-md border border-n-200 bg-surface p-5"
+                >
+                  <p className="text-xs text-ink-4">{other.category}</p>
+                  <p className="mt-1 font-medium text-ink group-hover:text-brand">{other.name}</p>
+                  <p className="mt-1 text-[0.9375rem] text-ink-3 text-pretty">{other.tagline}</p>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section className="border-t border-n-200 bg-paper-2">
+          <div className="mx-auto flex w-full max-w-[75rem] flex-wrap items-center justify-between gap-6 px-5 py-14 sm:px-8">
+            <div className="space-y-1">
+              <h2 className="text-xl leading-tight tracking-[-0.015em] font-semibold text-ink">¿Querés algo así para tu negocio?</h2>
+              <p className="text-[0.9375rem] text-ink-3 text-pretty">Contanos qué vendés y cómo te piden hoy. Te respondemos en el día hábil.</p>
+            </div>
+            <Button asChild size="lg">
+              <Link href="/contacto">
+                Hablemos de tu proyecto <ArrowRight />
+              </Link>
+            </Button>
+          </div>
+        </section>
+      )}
     </article>
   )
 }

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowRight, Check, MessageCircle } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Check, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { VerticalIllustration } from '@/components/marketing/vertical-illustration'
 import { FeaturesBento } from '@/components/marketing/features-bento'
@@ -8,7 +8,7 @@ import { HowItWorks } from '@/components/marketing/how-it-works'
 import { PricingBuilder } from '@/components/marketing/pricing-builder'
 import { MaintenanceBlock } from '@/components/marketing/maintenance-block'
 import { works } from '@/content/works'
-import { verticalLabel } from '@/lib/labels'
+import { SiteShot } from '@/components/marketing/site-shot'
 import { WhatsappLink } from '@/components/marketing/whatsapp-link'
 import { CONTACT_EMAIL } from '@/lib/contact'
 
@@ -56,7 +56,8 @@ const jsonLd = {
 }
 
 export default function LandingPage() {
-  const featured = works.slice(0, 3)
+  const [featured, ...rest] = works
+  const more = rest.slice(0, 2)
 
   return (
     <>
@@ -146,44 +147,103 @@ export default function LandingPage() {
       </section>
 
       {/* Casos reales. Mientras content/works.ts esté vacío la sección no se muestra:
-          mejor no tenerla que inventar clientes. */}
-      {featured.length > 0 ? (
-        <section className="mx-auto w-full max-w-[75rem] px-5 py-16 sm:px-8 lg:py-20">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div className="max-w-2xl space-y-3">
-              <Eyebrow>Trabajos</Eyebrow>
-              <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
-                Negocios que ya lo están usando.
-              </h2>
+          mejor no tenerla que inventar clientes. El primero va destacado con su captura. */}
+      {featured ? (
+        <section className="border-t border-n-200">
+          <div className="mx-auto w-full max-w-[75rem] px-5 py-16 sm:px-8 lg:py-20">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div className="max-w-2xl space-y-3">
+                <Eyebrow>Trabajos</Eyebrow>
+                <h2 className="text-[2rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
+                  Negocios que ya lo están usando.
+                </h2>
+              </div>
+              {works.length > 1 ? (
+                <Button asChild variant="ghost">
+                  <Link href="/trabajos">
+                    Ver todos <ArrowRight className="transition-transform duration-[120ms] group-hover/button:translate-x-0.5" />
+                  </Link>
+                </Button>
+              ) : null}
             </div>
-            <Button asChild variant="ghost">
-              <Link href="/trabajos">
-                Ver todos <ArrowRight className="transition-transform duration-[120ms] group-hover/button:translate-x-0.5" />
-              </Link>
-            </Button>
-          </div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {featured.map((work) => (
-              <Link
-                key={work.slug}
-                href={`/trabajos/${work.slug}`}
-                className="group flex flex-col overflow-hidden rounded-md border border-n-200 bg-surface"
-              >
-                <div className="flex aspect-[4/3] w-full items-center justify-center bg-paper-2 px-4">
-                  <VerticalIllustration vertical={work.vertical} />
-                </div>
-                <div className="flex-1 space-y-2 p-5">
-                  <div className="flex items-center gap-2 text-xs text-ink-4">
-                    <span>{verticalLabel(work.vertical)}</span>
-                    <span aria-hidden="true">·</span>
-                    <span>{work.city}</span>
+            <article className="mt-10 grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
+              <div className="lg:col-span-7">
+                {featured.image && featured.url ? (
+                  <Link href={`/trabajos/${featured.slug}`} className="group block rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand">
+                    <SiteShot
+                      src={featured.image.src}
+                      alt={featured.image.alt}
+                      url={featured.url}
+                      sizes="(min-width: 1200px) 660px, (min-width: 1024px) 58vw, 100vw"
+                      className="transition-colors duration-[120ms] group-hover:border-n-300"
+                    />
+                  </Link>
+                ) : (
+                  <div className="flex aspect-[16/10] w-full items-center justify-center rounded-md border border-n-200 bg-paper-2">
+                    <VerticalIllustration vertical={featured.vertical} className="[&_svg]:size-24" />
                   </div>
-                  <h3 className="font-medium text-ink group-hover:text-brand">{work.name}</h3>
-                  <p className="text-[0.9375rem] text-ink-3 text-pretty">{work.tagline}</p>
+                )}
+              </div>
+
+              <div className="space-y-6 lg:col-span-5">
+                <div className="space-y-3">
+                  <p className="flex flex-wrap items-center gap-2 text-[0.875rem] text-ink-3">
+                    <span>{featured.category}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{featured.city}</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="tnum">{featured.year}</span>
+                  </p>
+                  <h3 className="text-[1.75rem] leading-[1.15] tracking-[-0.02em] font-semibold text-balance text-ink">
+                    {featured.name}
+                  </h3>
+                  <p className="text-[1.0625rem] leading-[1.55] text-ink-2 text-pretty">{featured.summary}</p>
                 </div>
-              </Link>
-            ))}
+
+                <dl className="divide-y divide-n-200 border-y border-n-200">
+                  {featured.results.map((result) => (
+                    <div key={result.label} className="flex items-baseline gap-4 py-3">
+                      <dd className="w-8 shrink-0 text-xl leading-none font-semibold tnum text-ink">{result.value}</dd>
+                      <dt className="text-[0.9375rem] text-ink-3 text-pretty">{result.label}</dt>
+                    </div>
+                  ))}
+                </dl>
+
+                <div className="flex flex-wrap gap-3">
+                  <Button asChild>
+                    <Link href={`/trabajos/${featured.slug}`}>
+                      Ver el caso <ArrowRight />
+                    </Link>
+                  </Button>
+                  {featured.url ? (
+                    <Button asChild variant="outline">
+                      <a href={featured.url} target="_blank" rel="noreferrer">
+                        Visitar el sitio <ArrowUpRight />
+                      </a>
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            </article>
+
+            {more.length > 0 ? (
+              <div className="mt-12 grid gap-4 md:grid-cols-2">
+                {more.map((work) => (
+                  <Link
+                    key={work.slug}
+                    href={`/trabajos/${work.slug}`}
+                    className="group rounded-md border border-n-200 bg-surface p-5"
+                  >
+                    <p className="text-xs text-ink-4">
+                      {work.category} · {work.city}
+                    </p>
+                    <p className="mt-1 font-medium text-ink group-hover:text-brand">{work.name}</p>
+                    <p className="mt-1 text-[0.9375rem] text-ink-3 text-pretty">{work.tagline}</p>
+                  </Link>
+                ))}
+              </div>
+            ) : null}
           </div>
         </section>
       ) : null}
